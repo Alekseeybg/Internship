@@ -2,6 +2,7 @@ package com.spring.Blog.controller;
 
 import com.spring.Blog.service.UserService;
 import com.spring.Blog.model.User;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,24 +14,30 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/users")
+@AllArgsConstructor
 public class UserController {
     @Autowired
-    private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    private UserService userService;
 
     @GetMapping
-    @RequestMapping
-    public ResponseEntity<List<User>> getUsers(){
+    public ResponseEntity<List<User>> getUsers() {
         return userService.getUsers();
     }
 
-    @GetMapping
-    @RequestMapping(value = "/{id}")
-    public User getUserById(@PathVariable("id") Long id) {
-        return userService.getUserById(id);
+/*    @GetMapping(path = "api/v1/admins")
+    public ResponseEntity<List<User>> getAdmins() {
+        return userService.getAdmins();
     }
 
+    @GetMapping
+    @RequestMapping(value = "api/v1/admins/{id}")
+    public ResponseEntity<User> getAdminById(@PathVariable("id") Long id) {
+        return userService.getUserById(id);
+    }*/
+
+    @GetMapping
+    @RequestMapping(value = "/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
+        return userService.getUserById(id);
+    }
 }

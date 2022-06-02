@@ -1,50 +1,53 @@
 package com.spring.Blog.utility.user;
 
+import com.spring.Blog.model.Blog;
 import com.spring.Blog.model.User;
 
 import com.spring.Blog.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
 
 import static com.spring.Blog.utility.user.UserValidator.*;
+import static com.spring.Blog.utility.user.UserRoles.*;
+
 
 @Component
+@AllArgsConstructor
 public class UserUtility {
 
-
-    private static UserRepository userRepository;
-
-
     @Autowired
-    public UserUtility(UserRepository userRepository) {
-        UserUtility.userRepository = userRepository;
-    }
+    private UserRepository userRepository;
 
-
-    public static ValidationMessages validateUser(User user) {
+    public ValidationMessages validateUser(User user) {
         return (isValidName())
                 .and(isValidEmail())
                 .and(isValidPassword())
                 .apply(user);
     }
 
-
-    public static boolean userExists(String username) {
+    public boolean userExists(String username) {
         return userRepository.findByUsername(username) != null;
     }
 
-    public static boolean emailExists(String email) {
+    public boolean emailExists(String email) {
         return userRepository.findByEmail(email) != null;
     }
 
-    public static boolean correctPassword(User user, String password) {
+    public boolean correctPassword(User user, String password) {
         return user.getPassword().equals(password);
     }
 
-    public static boolean userLogged(User user) {
+    public boolean userLogged(User user) {
         return user.isLogged();
+    }
+
+    public boolean userIsOwner(Blog blog, User user) {
+        return blog.getOwner().equals(user);
+    }
+
+    public boolean userIsAdmin(User user) {
+
+        return user.getRole().equals(ADMIN);
     }
 }

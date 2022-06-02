@@ -2,8 +2,7 @@ package com.spring.Blog.controller;
 
 import com.spring.Blog.model.User;
 import com.spring.Blog.service.AuthService;
-import lombok.Getter;
-import lombok.Setter;
+import com.spring.Blog.utility.user.UserRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
@@ -11,17 +10,16 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "api/v1/auth/")
-@Getter
-@Setter
 public class AuthController {
     @Autowired
     private AuthService authService;
-
+    @Autowired
+    private UserRoles userRoles;
 
     @PostMapping
     @RequestMapping(path = "register")
-    public ResponseEntity<String> register(@RequestBody User user) {
-        return authService.register(user);
+    public ResponseEntity<String> register(@RequestBody User user, @RequestParam(name = "role", defaultValue = "UserRoles.USER") UserRoles role) {
+        return authService.register(user,role);
     }
 
     @PostMapping
@@ -32,7 +30,7 @@ public class AuthController {
 
     @PostMapping
     @RequestMapping(path = "logout")
-    public ResponseEntity<User> logout(@RequestBody User user) {
+    public ResponseEntity<String> logout(@RequestBody User user) {
         return authService.logout(user);
     }
 }

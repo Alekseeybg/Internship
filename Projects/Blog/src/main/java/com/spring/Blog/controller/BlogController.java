@@ -7,23 +7,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/v1/")
+@RequestMapping(path = "api/v1/blogs/")
 @AllArgsConstructor
 public class BlogController {
     @Autowired
     private BlogService blogService;
 
-    @GetMapping(path = "blogs")
+    @GetMapping
     public ResponseEntity<List<Blog>> getBlogs() {
         return blogService.getBlogs();
     }
 
-    @PostMapping(path = "{username}/blogs/new")
-    public ResponseEntity<Blog> addBlogToUser(@RequestBody Blog blog, @PathVariable("username") String username) {
+    @PostMapping(path = "new")
+    public ResponseEntity<Blog> addBlogToUser(@RequestBody Blog blog, @RequestParam(name = "user") String username) {
         return blogService.addBlog(blog, username);
+    }
+
+    @DeleteMapping(path = "{blogId}")
+    public ResponseEntity<String> deleteBlog(@PathVariable("blogId") long blogId, @RequestParam(name = "user") String username) {
+        return blogService.deleteBlog(blogId, username);
+    }
+
+    @PutMapping(path = "{blogId}")
+    public ResponseEntity<String> updateBlog(@RequestBody Blog blog, @PathVariable("blogId") long blogId, @RequestParam(name = "user") String username) {
+        return blogService.updateBlog(blog, blogId, username);
     }
 }

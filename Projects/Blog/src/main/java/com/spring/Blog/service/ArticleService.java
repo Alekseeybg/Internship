@@ -24,6 +24,8 @@ public class ArticleService {
     private BlogRepository blogRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserUtility userUtility;
 
     public List<Article> getArticles() {
         return articleRepository.findAll();
@@ -36,16 +38,18 @@ public class ArticleService {
     public ResponseEntity<String> addArticle(Article article, String username, long blogId) {
         User user;
         Blog blog;
-        if (UserUtility.userExists(username)) {
+
+        if (userUtility.userExists(username)) {
             user = userRepository.findByUsername(username);
         } else {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
+
         if (blogExists(blogId)) {
             blog = blogRepository.findById(blogId).get();
-            if (UserUtility.userLogged(user)) {
+            if (userUtility.userLogged(user)) {
                 article.setBlog(blog);
-                blog.setUser(user);
+                blog.setOwner(user);
                 articleRepository.save(article);
                 return new ResponseEntity<>("Article created successfully", HttpStatus.OK);
             } else {
@@ -54,6 +58,5 @@ public class ArticleService {
         } else {
             return new ResponseEntity<>("Blog does not exist", HttpStatus.NOT_FOUND);
         }
-
     }
 }
