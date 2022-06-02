@@ -72,10 +72,8 @@ public class ImageController {
 
     @GetMapping(value = "/files2/{filename:.+}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> fromClasspathAsResEntity(@PathVariable String filename) throws IOException {
-
         ClassPathResource imageFile = new ClassPathResource("static/images/" + filename);
         byte[] imageBytes = StreamUtils.copyToByteArray(imageFile.getInputStream());
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
     }
-
 }

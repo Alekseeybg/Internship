@@ -1,4 +1,4 @@
-package com.spring.Blog.utility;
+package com.spring.Blog.utility.user;
 
 import com.spring.Blog.model.User;
 
@@ -6,8 +6,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.spring.Blog.utility.ValidationMessages.*;
-import static com.spring.Blog.utility.ValidationMessages.SUCCESS;
+import static com.spring.Blog.utility.user.ValidationMessages.*;
+import static com.spring.Blog.utility.user.ValidationMessages.SUCCESS;
 
 public interface UserValidator extends Function<User, ValidationMessages> {
 

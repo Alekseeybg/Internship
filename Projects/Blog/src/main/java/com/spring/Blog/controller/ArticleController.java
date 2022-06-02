@@ -21,8 +21,8 @@ public class ArticleController {
     }
 
     @PostMapping
-    @RequestMapping(path = "{username}/blogs/{blogId}/articles/add")
-    public ResponseEntity<Article> addArticle(@RequestBody Article article, @PathVariable("username") String username, @PathVariable("blogId") long blogId) {
+    @RequestMapping(path = "{username}/blogs/{blogId}/articles/new")
+    public ResponseEntity<String> addArticle(@RequestBody Article article, @PathVariable("username") String username, @PathVariable("blogId") long blogId) {
         return articleService.addArticle(article, username, blogId);
     }
 }

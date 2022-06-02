@@ -3,25 +3,22 @@ package com.spring.Blog.service;
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.AuthRepository;
 import com.spring.Blog.repository.UserRepository;
-import com.spring.Blog.utility.ValidationMessages;
+import com.spring.Blog.utility.user.UserUtility;
+import com.spring.Blog.utility.user.ValidationMessages;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import static com.spring.Blog.utility.UserValidator.*;
-import static com.spring.Blog.utility.ValidationMessages.SUCCESS;
+import static com.spring.Blog.utility.user.UserValidator.*;
+import static com.spring.Blog.utility.user.ValidationMessages.SUCCESS;
+
 
 
 @Service
-@Getter
-@Setter
 @AllArgsConstructor
 public class AuthService {
     @Autowired
@@ -30,19 +27,13 @@ public class AuthService {
     private UserRepository userRepository;
 
     public ResponseEntity<String> register(@RequestBody User user) {
-        ValidationMessages result = (isValidName())
-                .and(isValidEmail())
-                .and(isValidPassword())
-                .apply(user);
-
+        ValidationMessages result = UserUtility.validateUser(user);
         if (result != SUCCESS) {
             return ResponseEntity.badRequest().body(result.getMessage());
         }
-        if (userRepository.findByUsername(user.getUsername()) != null) {
-            return ResponseEntity.badRequest().body("Username already exists");
-        }
-        if (userRepository.findByEmail(user.getEmail()) != null) {
-            return ResponseEntity.badRequest().body("Email already exists");
+
+        if (UserUtility.userExists(user.getUsername()) || UserUtility.emailExists(user.getEmail())) {
+            return ResponseEntity.badRequest().body("Username or Email already exists");
         }
         try {
             authRepository.save(user);
@@ -52,25 +43,32 @@ public class AuthService {
         }
     }
 
+
+
     public ResponseEntity<String> login(@RequestBody User user) {
-        User userDb = userRepository.findByEmail(user.getEmail());
-        if (userDb == null) {
+        if (!UserUtility.emailExists(user.getEmail())) {
             return ResponseEntity.badRequest().body("User not found");
+        } else {
+            User userDb = userRepository.findByEmail(user.getEmail());
+            if (!UserUtility.correctPassword(userDb, user.getPassword())) {
+                return ResponseEntity.badRequest().body("Incorrect password");
+            } else {
+                userDb.setLogged(true);
+                userRepository.save(userDb);
+                return new ResponseEntity<>("User logged in successfully", HttpStatus.OK);
+            }
         }
-        if (user.getPassword().equals(userDb.getPassword())) {
-            userDb.setLogged(true);
-            userRepository.save(userDb);
-            return new ResponseEntity<>("User logged in!", HttpStatus.OK);
-        }
-        return new ResponseEntity<>("Wrong password",HttpStatus.NOT_FOUND);
     }
 
     public ResponseEntity<User> logout(@RequestBody User user) {
-        User user1 = userRepository.findByEmail(user.getEmail());
-        if (user.isLogged()) {
-            user.setLogged(false);
-            return new ResponseEntity<>(user, HttpStatus.OK);
+        if (UserUtility.emailExists(user.getEmail())) {
+            User userDb = authRepository.findUserByEmail(user.getEmail());
+            if (UserUtility.userLogged(userDb)) {
+                userDb.setLogged(false);
+                userRepository.save(userDb);
+                return new ResponseEntity<>(userDb, HttpStatus.OK);
+            }
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

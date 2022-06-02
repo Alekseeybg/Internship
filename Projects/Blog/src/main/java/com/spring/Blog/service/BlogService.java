@@ -4,6 +4,7 @@ import com.spring.Blog.model.Blog;
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.BlogRepository;
 import com.spring.Blog.repository.UserRepository;
+import com.spring.Blog.utility.user.UserUtility;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,14 +26,19 @@ public class BlogService {
         List<Blog> blogs = blogRepository.findAll();
         return blogs.isEmpty() ? new ResponseEntity<>(HttpStatus.NOT_FOUND) : new ResponseEntity<>(blogs, HttpStatus.OK);
     }
-
+    public boolean blogExists(long blogId) {
+        return blogRepository.findById(blogId).isPresent();
+    }
     public ResponseEntity<Blog> addBlog(Blog blog, String username) {
-        if (userRepository.findByUsername(username) == null) {
+        if (!UserUtility.userExists(username)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         User user = userRepository.findByUsername(username);
-        blog.setUser(user);
-        blogRepository.save(blog);
-        return new ResponseEntity<>(blog, HttpStatus.OK);
+        if (UserUtility.userLogged(user)) {
+            blog.setUser(user);
+            return new ResponseEntity<>(blogRepository.save(blog), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
     }
 }

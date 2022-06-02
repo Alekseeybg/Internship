@@ -11,7 +11,8 @@ import javax.persistence.*;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter
+@Getter
+@Setter
 @JsonIgnoreProperties("blog")
 public class Article {
     @Id
@@ -29,7 +30,6 @@ public class Article {
     @ManyToOne
     @JoinColumn(name = "blog_id")
     private Blog blog;
-
 
     public Article(String title, String content) {
         this.title = title;
