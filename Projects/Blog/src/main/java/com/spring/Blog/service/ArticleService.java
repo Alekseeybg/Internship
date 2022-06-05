@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
 public class ArticleService {
     @Autowired
     private ArticleRepository articleRepository;
@@ -28,7 +27,7 @@ public class ArticleService {
     private UserUtility userUtility;
 
     public List<Article> getArticles() {
-        return articleRepository.findAll();
+        return articleRepository.findAll().isEmpty() ? null : articleRepository.findAll();
     }
 
     public boolean blogExists(long blogId) {
@@ -50,6 +49,7 @@ public class ArticleService {
             if (userUtility.userLogged(user)) {
                 article.setBlog(blog);
                 blog.setOwner(user);
+                blog.addArticle(article);
                 articleRepository.save(article);
                 return new ResponseEntity<>("Article created successfully", HttpStatus.OK);
             } else {

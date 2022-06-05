@@ -14,16 +14,14 @@ import java.util.List;
 import static com.spring.Blog.utility.user.UserRoles.*;
 
 @Service
-@AllArgsConstructor
 public class UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private UserUtility userUtility;
 
-    public ResponseEntity<List<User>> getUsers() {
-        List<User> users = userRepository.findAll();
-        return users.isEmpty() ? new ResponseEntity<>(HttpStatus.NOT_FOUND) : new ResponseEntity<>(users, HttpStatus.OK);
+    public List<User> getUsers() {
+        return userRepository.findAll();
     }
 
     public ResponseEntity<List<User>> getAdmins() {

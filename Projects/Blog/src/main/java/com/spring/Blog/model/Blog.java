@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@JsonIgnoreProperties("user")
+@JsonIgnoreProperties("owner")
 public class Blog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

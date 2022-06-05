@@ -16,6 +16,7 @@ public class AuthController {
 
     @PostMapping
     @RequestMapping(path = "register")
+
     public ResponseEntity<String> register(@RequestBody User user, @RequestParam(name = "role", defaultValue = "USER") UserRoles role) {
         return authService.register(user, role);
     }

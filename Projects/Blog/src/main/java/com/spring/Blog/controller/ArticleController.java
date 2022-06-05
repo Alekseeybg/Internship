@@ -21,7 +21,7 @@ public class ArticleController {
     }
 
     @PostMapping
-    @RequestMapping(path = "new-article")
+    @RequestMapping(path = "new")
     public ResponseEntity<String> addArticle(@RequestBody Article article,
                                              @RequestParam(name = "user", defaultValue = "username") String username,
                                              @RequestParam(name = "blogId", defaultValue = "1") long blogId) {

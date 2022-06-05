@@ -23,7 +23,7 @@ public class AuthService {
     @Autowired
     private UserUtility userUtility;
 
-    public ResponseEntity<String> register(@RequestBody User user, @RequestParam(name = "role", defaultValue = "USER") UserRoles role) {
+    public ResponseEntity<String> register(User user, UserRoles role) {
         ValidationMessages result = userUtility.validateUser(user);
         if (result != SUCCESS) {
             return ResponseEntity.badRequest().body(result.getMessage());
@@ -33,7 +33,7 @@ public class AuthService {
             return ResponseEntity.badRequest().body("Username or Email already exists");
         }
         try {
-            user.setRole(role);
+            user.setRole(role.getRole());
             userRepository.save(user);
             return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
         } catch (IllegalStateException e) {

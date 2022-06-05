@@ -12,14 +12,24 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/blogs/")
+@AllArgsConstructor
 public class BlogController {
     @Autowired
     private BlogService blogService;
 
     @GetMapping
     public ResponseEntity<List<Blog>> getBlogs() {
-        return new ResponseEntity<>(blogService.getBlogs(), HttpStatus.OK);
+        return blogService.getBlogs().isEmpty() ?
+                new ResponseEntity<>(HttpStatus.NOT_FOUND) :
+                new ResponseEntity<>(blogService.getBlogs(), HttpStatus.OK);
     }
+
+   /* @PostMapping(path = "new")
+    public ResponseEntity<Blog> addBlogToUser(@RequestBody Blog blog, @RequestParam(name = "user") String username) {
+
+        // == null ? new ResponseEntity<>(HttpStatus.NOT_FOUND) : new ResponseEntity<>(blogService.addBlog(blog, username), HttpStatus.OK);
+        return blogService.addBlog(blog, username);
+    }*/
 
     @PostMapping(path = "new")
     public ResponseEntity<Blog> addBlogToUser(@RequestBody Blog blog, @RequestParam(name = "user") String username) {

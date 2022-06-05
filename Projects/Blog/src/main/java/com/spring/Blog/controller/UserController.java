@@ -4,6 +4,7 @@ import com.spring.Blog.service.UserService;
 import com.spring.Blog.model.User;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +21,9 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<User>> getUsers() {
-        return userService.getUsers();
+        return !userService.getUsers().isEmpty() ?
+                new ResponseEntity<>(userService.getUsers(), HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
 /*    @GetMapping(path = "api/v1/admins")

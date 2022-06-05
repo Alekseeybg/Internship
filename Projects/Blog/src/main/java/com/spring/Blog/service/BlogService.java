@@ -10,24 +10,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
 
 @Service
-@AllArgsConstructor
 public class BlogService {
     @Autowired
-    private final BlogRepository blogRepository;
+    private BlogRepository blogRepository;
     @Autowired
-    private final UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
     private UserUtility userUtility;
 
 
     public List<Blog> getBlogs() {
         List<Blog> blogs = blogRepository.findAll();
-        return blogs.isEmpty() ? null: blogs;
+        if (blogs.isEmpty()) {
+            return null;
+        } else {
+            return blogs;
+        }
     }
 
     public ResponseEntity<Blog> addBlog(Blog blog, String username) {
@@ -44,6 +48,20 @@ public class BlogService {
         }
     }
 
+    /* public Blog addBlog(@RequestBody Blog blog, String username) {
+      if (!userUtility.userExists(username)) {
+          return null;
+      }
+      User user = userRepository.findByUsername(username);
+
+      if (userUtility.userLogged(user)) {
+          blog.setOwner(user);
+          return blogRepository.save(blog);
+      } else {
+          return null;
+      }
+  }
+*/
     public ResponseEntity<String> deleteBlog(long blogId, String username) {
         if (!userUtility.userExists(username)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -55,7 +73,7 @@ public class BlogService {
                 Blog blogToDelete = blogRepository.findById(blogId).get();
                 if (userUtility.userIsOwner(blogToDelete, user)) {
                     blogRepository.deleteById(blogId);
-                    return new ResponseEntity<>("Blog deleted successfully",HttpStatus.OK);
+                    return new ResponseEntity<>("Blog deleted successfully", HttpStatus.OK);
                 } else {
                     return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
                 }
@@ -79,7 +97,7 @@ public class BlogService {
                 if (userUtility.userIsOwner(blogToUpdate, user)) {
                     blogToUpdate.setTitle(blog.getTitle());
                     blogRepository.save(blogToUpdate);
-                    return new ResponseEntity<>("Blog updated successfully",HttpStatus.OK);
+                    return new ResponseEntity<>("Blog updated successfully", HttpStatus.OK);
                 } else {
                     return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
                 }
