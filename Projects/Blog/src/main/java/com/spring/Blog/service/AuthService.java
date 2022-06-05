@@ -5,7 +5,6 @@ import com.spring.Blog.repository.UserRepository;
 import com.spring.Blog.utility.user.UserRoles;
 import com.spring.Blog.utility.user.UserUtility;
 import com.spring.Blog.utility.user.ValidationMessages;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
@@ -15,18 +14,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import static com.spring.Blog.utility.user.ValidationMessages.SUCCESS;
+import static com.spring.Blog.utility.user.UserRoles.USER;
 
 @Service
-@AllArgsConstructor
 public class AuthService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private UserUtility userUtility;
-    @Autowired
-    private UserRoles role;
 
-    public ResponseEntity<String> register(@RequestBody User user, @RequestParam(name = "role", defaultValue = "UserRoles.USER") UserRoles role) {
+    public ResponseEntity<String> register(@RequestBody User user, @RequestParam(name = "role", defaultValue = "USER") UserRoles role) {
         ValidationMessages result = userUtility.validateUser(user);
         if (result != SUCCESS) {
             return ResponseEntity.badRequest().body(result.getMessage());
@@ -36,6 +33,7 @@ public class AuthService {
             return ResponseEntity.badRequest().body("Username or Email already exists");
         }
         try {
+            user.setRole(role);
             userRepository.save(user);
             return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
         } catch (IllegalStateException e) {

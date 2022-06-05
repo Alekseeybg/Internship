@@ -4,6 +4,7 @@ import com.spring.Blog.model.Blog;
 import com.spring.Blog.service.BlogService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,14 +12,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/blogs/")
-@AllArgsConstructor
 public class BlogController {
     @Autowired
     private BlogService blogService;
 
     @GetMapping
     public ResponseEntity<List<Blog>> getBlogs() {
-        return blogService.getBlogs();
+        return new ResponseEntity<>(blogService.getBlogs(), HttpStatus.OK);
     }
 
     @PostMapping(path = "new")

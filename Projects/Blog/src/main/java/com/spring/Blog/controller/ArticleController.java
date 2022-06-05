@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
 @RequestMapping(path = "api/v1/articles/")
 public class ArticleController {
     @Autowired

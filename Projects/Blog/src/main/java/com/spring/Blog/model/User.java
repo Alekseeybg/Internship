@@ -28,6 +28,7 @@ public class User {
     private String password;
 
     private boolean logged;
+    @Enumerated(EnumType.ORDINAL)
     private UserRoles role;
 
     @OneToMany(mappedBy = "owner")
