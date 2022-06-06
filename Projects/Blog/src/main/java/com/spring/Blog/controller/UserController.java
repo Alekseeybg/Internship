@@ -14,32 +14,45 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/v1/users")
+@RequestMapping(path = "api/v1")
 public class UserController {
     @Autowired
     private UserService userService;
 
     @GetMapping
+    @RequestMapping(path = "/users")
     public ResponseEntity<List<User>> getUsers() {
         return !userService.getUsers().isEmpty() ?
                 new ResponseEntity<>(userService.getUsers(), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-/*    @GetMapping(path = "api/v1/admins")
+    @GetMapping
+    @RequestMapping(path = "/admins")
     public ResponseEntity<List<User>> getAdmins() {
         return userService.getAdmins();
     }
 
     @GetMapping
-    @RequestMapping(value = "api/v1/admins/{id}")
+    @RequestMapping(value = "/admins/{id}")
     public ResponseEntity<User> getAdminById(@PathVariable("id") Long id) {
-        return userService.getUserById(id);
-    }*/
+        User user = userService.getAdminById(id);
+        if (userService.getAdminById(id) != null) {
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     @GetMapping
-    @RequestMapping(value = "/{id}")
+    @RequestMapping(value = "/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
-        return userService.getUserById(id);
+        User user = userService.getUserById(id);
+        if (userService.getUserById(id) != null) {
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
     }
 }

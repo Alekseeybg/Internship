@@ -48,6 +48,6 @@ public class UserUtility {
 
     public boolean userIsAdmin(User user) {
 
-        return user.getRole().equals(ADMIN);
+        return user.getRole().equals(ADMIN.getRole());
     }
 }

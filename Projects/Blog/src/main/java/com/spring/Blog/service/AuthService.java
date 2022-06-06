@@ -35,7 +35,7 @@ public class AuthService {
         try {
             user.setRole(role.getRole());
             userRepository.save(user);
-            return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
+            return new ResponseEntity<>(role.getRole() + " registered successfully", HttpStatus.CREATED);
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -62,7 +62,7 @@ public class AuthService {
             if (userUtility.userLogged(userDb)) {
                 userDb.setLogged(false);
                 userRepository.save(userDb);
-                return new ResponseEntity<>("Deleted", HttpStatus.OK);
+                return new ResponseEntity<>("User logged out", HttpStatus.NO_CONTENT);
             }
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

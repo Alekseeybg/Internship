@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/v1/blogs/")
+@RequestMapping(path = "api/v1/blogs")
 @AllArgsConstructor
 public class BlogController {
     @Autowired
@@ -23,25 +23,17 @@ public class BlogController {
                 new ResponseEntity<>(HttpStatus.NOT_FOUND) :
                 new ResponseEntity<>(blogService.getBlogs(), HttpStatus.OK);
     }
-
-   /* @PostMapping(path = "new")
-    public ResponseEntity<Blog> addBlogToUser(@RequestBody Blog blog, @RequestParam(name = "user") String username) {
-
-        // == null ? new ResponseEntity<>(HttpStatus.NOT_FOUND) : new ResponseEntity<>(blogService.addBlog(blog, username), HttpStatus.OK);
-        return blogService.addBlog(blog, username);
-    }*/
-
-    @PostMapping(path = "new")
+    @PostMapping(path = "/new")
     public ResponseEntity<Blog> addBlogToUser(@RequestBody Blog blog, @RequestParam(name = "user") String username) {
         return blogService.addBlog(blog, username);
     }
 
-    @DeleteMapping(path = "{blogId}")
+    @DeleteMapping(path = "/{blogId}")
     public ResponseEntity<String> deleteBlog(@PathVariable("blogId") long blogId, @RequestParam(name = "user") String username) {
         return blogService.deleteBlog(blogId, username);
     }
 
-    @PutMapping(path = "{blogId}")
+    @PutMapping(path = "/{blogId}")
     public ResponseEntity<String> updateBlog(@RequestBody Blog blog, @PathVariable("blogId") long blogId, @RequestParam(name = "user") String username) {
         return blogService.updateBlog(blog, blogId, username);
     }
