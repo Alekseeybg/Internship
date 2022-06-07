@@ -4,6 +4,7 @@ import com.spring.Blog.model.User;
 import com.spring.Blog.service.AuthService;
 import com.spring.Blog.utility.user.UserRoles;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +17,17 @@ public class AuthController {
 
     @PostMapping
     @RequestMapping(path = "/register")
-    public ResponseEntity<String> register(@RequestBody User user, @RequestParam(name = "role", defaultValue = "USER") UserRoles role) {
-        return authService.register(user, role);
+    public ResponseEntity<User> register(@RequestBody User user, @RequestParam(name = "role", defaultValue = "USER") UserRoles role) {
+
+        return new ResponseEntity<>(authService.register(user, role), HttpStatus.CREATED);
     }
 
     @PostMapping
     @RequestMapping(path = "/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
-        return authService.login(user);
+    public ResponseEntity<User> login(@RequestBody User user) {
+        User loggedUser = authService.login(user);
+        return new ResponseEntity<>(loggedUser, HttpStatus.OK);
+
     }
 
     @PostMapping

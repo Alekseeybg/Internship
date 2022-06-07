@@ -13,11 +13,10 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter
 @Setter
-@JsonIgnoreProperties("blog")
+@JsonIgnoreProperties({"blog", "author"})
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "article_id")
     private long id;
 
     private String title;
@@ -25,12 +24,16 @@ public class Article {
     private String content;
 
     //@OneToOne
-   // @JoinColumn(name = "image_id")
+    // @JoinColumn(name = "image_id")
     //private long image_id;
 
     @ManyToOne
     @JoinColumn(name = "blog_id")
     private Blog blog;
+
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private User author;
 
     public Article(String title, String content) {
         this.title = title;
@@ -44,12 +47,4 @@ public class Article {
     public void setImage_id(long image_id) {
         this.image_id = image_id;
     }*/
-
-    public Blog getBlog() {
-        return blog;
-    }
-
-    public void setBlog(Blog blog) {
-        this.blog = blog;
-    }
 }

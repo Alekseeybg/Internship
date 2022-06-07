@@ -12,20 +12,19 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/blogs")
-@AllArgsConstructor
 public class BlogController {
     @Autowired
     private BlogService blogService;
 
     @GetMapping
     public ResponseEntity<List<Blog>> getBlogs() {
-        return blogService.getBlogs().isEmpty() ?
-                new ResponseEntity<>(HttpStatus.NOT_FOUND) :
-                new ResponseEntity<>(blogService.getBlogs(), HttpStatus.OK);
+        return new ResponseEntity<>(blogService.getBlogs(), HttpStatus.OK);
     }
-    @PostMapping(path = "/new")
+
+    @PostMapping
     public ResponseEntity<Blog> addBlogToUser(@RequestBody Blog blog, @RequestParam(name = "user") String username) {
-        return blogService.addBlog(blog, username);
+        blog = blogService.addBlog(blog, username);
+        return new ResponseEntity<>(blog, HttpStatus.CREATED);
     }
 
     @DeleteMapping(path = "/{blogId}")
@@ -34,7 +33,7 @@ public class BlogController {
     }
 
     @PutMapping(path = "/{blogId}")
-    public ResponseEntity<String> updateBlog(@RequestBody Blog blog, @PathVariable("blogId") long blogId, @RequestParam(name = "user") String username) {
-        return blogService.updateBlog(blog, blogId, username);
+    public ResponseEntity<Blog> updateBlog(@RequestBody Blog blog, @PathVariable("blogId") long blogId, @RequestParam(name = "user") String username) {
+        return new ResponseEntity<>(blogService.updateBlog(blog, blogId, username), HttpStatus.OK);
     }
 }

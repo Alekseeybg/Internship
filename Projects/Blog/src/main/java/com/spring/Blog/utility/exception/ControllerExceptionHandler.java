@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import javax.security.sasl.AuthenticationException;
 import java.util.Date;
 
 @ControllerAdvice
@@ -22,6 +21,7 @@ public class ControllerExceptionHandler {
 
         return new ResponseEntity<ErrorMessage>(message, HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> globalExceptionHandler(Exception ex, WebRequest request) {
         ErrorMessage message = new ErrorMessage(
@@ -33,14 +33,36 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<ErrorMessage>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorMessage> UnauthorizedException(Exception ex, WebRequest request) {
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorMessage> UnauthorizedException(UnauthorizedException ex, WebRequest request) {
         ErrorMessage message = new ErrorMessage(
                 HttpStatus.UNAUTHORIZED.value(),
                 new Date(),
                 ex.getMessage(),
                 request.getDescription(false));
 
-        return new ResponseEntity<ErrorMessage>(message, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(message, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public ResponseEntity<ErrorMessage> UnprocessableEntityException(UnprocessableEntityException ex, WebRequest request) {
+        ErrorMessage message = new ErrorMessage(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false));
+
+        return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorMessage> ForbiddenException(ForbiddenException ex, WebRequest request) {
+        ErrorMessage message = new ErrorMessage(
+                HttpStatus.FORBIDDEN.value(),
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false));
+
+        return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
     }
 }

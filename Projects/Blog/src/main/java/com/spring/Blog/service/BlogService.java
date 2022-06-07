@@ -4,13 +4,13 @@ import com.spring.Blog.model.Blog;
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.BlogRepository;
 import com.spring.Blog.repository.UserRepository;
-import com.spring.Blog.utility.user.UserUtility;
-import lombok.AllArgsConstructor;
+import com.spring.Blog.utility.exception.ResourceNotFoundException;
+import com.spring.Blog.utility.exception.UnauthorizedException;
+import com.spring.Blog.utility.EntityUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -22,56 +22,42 @@ public class BlogService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private UserUtility userUtility;
+    private EntityUtility entityUtility;
 
 
     public List<Blog> getBlogs() {
         List<Blog> blogs = blogRepository.findAll();
         if (blogs.isEmpty()) {
-            return null;
+            throw new ResourceNotFoundException("No blogs found");
         } else {
             return blogs;
         }
     }
 
-    public ResponseEntity<Blog> addBlog(Blog blog, String username) {
-        if (!userUtility.userExists(username)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public Blog addBlog(Blog blog, String username) {
+        if (!entityUtility.userExists(username)) {
+            throw new ResourceNotFoundException("User not found");
         }
         User user = userRepository.findByUsername(username);
 
-        if (userUtility.userLogged(user)) {
+        if (entityUtility.userLogged(user)) {
             blog.setOwner(user);
-            return new ResponseEntity<>(blogRepository.save(blog), HttpStatus.OK);
+            return blogRepository.save(blog);
         } else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            throw new UnauthorizedException("UNAUTHORIZED request");
         }
     }
 
-    /* public Blog addBlog(@RequestBody Blog blog, String username) {
-      if (!userUtility.userExists(username)) {
-          return null;
-      }
-      User user = userRepository.findByUsername(username);
-
-      if (userUtility.userLogged(user)) {
-          blog.setOwner(user);
-          return blogRepository.save(blog);
-      } else {
-          return null;
-      }
-  }
-*/
     public ResponseEntity<String> deleteBlog(long blogId, String username) {
-        if (!userUtility.userExists(username)) {
+        if (!entityUtility.userExists(username)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         User user = userRepository.findByUsername(username);
 
-        if (userUtility.userLogged(user)) {
+        if (entityUtility.userLogged(user)) {
             if (blogRepository.findById(blogId).isPresent()) {
                 Blog blogToDelete = blogRepository.findById(blogId).get();
-                if (userUtility.userIsOwner(blogToDelete, user)) {
+                if (entityUtility.userIsOwner(blogToDelete, user)) {
                     blogRepository.deleteById(blogId);
                     return new ResponseEntity<>("Blog deleted successfully", HttpStatus.OK);
                 } else {
@@ -85,28 +71,14 @@ public class BlogService {
         }
     }
 
-    public ResponseEntity<String> updateBlog(Blog blog, long blogId, String username) {
-        if (!userUtility.userExists(username)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        User user = userRepository.findByUsername(username);
-
-        if (userUtility.userLogged(user)) {
-            if (blogRepository.findById(blogId).isPresent()) {
-                Blog blogToUpdate = blogRepository.findById(blogId).get();
-                if (userUtility.userIsOwner(blogToUpdate, user)) {
-                    blogToUpdate.setTitle(blog.getTitle());
-                    blogRepository.save(blogToUpdate);
-                    return new ResponseEntity<>("Blog updated successfully", HttpStatus.OK);
-                } else {
-                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-                }
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+    public Blog updateBlog(Blog blog, long blogId, String username) {
+        User user = entityUtility.getUserByUsername(username);
+        Blog blogToUpdate = entityUtility.getBlogById(blogId);
+        if (entityUtility.userLogged(user) && entityUtility.userIsOwner(blogToUpdate, user)) {
+            blogToUpdate.setTitle(blog.getTitle());
+            return blogRepository.save(blogToUpdate);
         } else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+           throw new UnauthorizedException("UNAUTHORIZED request");
         }
     }
-
 }
