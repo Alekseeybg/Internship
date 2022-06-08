@@ -6,15 +6,13 @@ import com.spring.Blog.model.User;
 import com.spring.Blog.repository.ArticleRepository;
 import com.spring.Blog.repository.BlogRepository;
 import com.spring.Blog.repository.UserRepository;
-import com.spring.Blog.utility.exception.ResourceNotFoundException;
 import com.spring.Blog.utility.exception.UnauthorizedException;
-import com.spring.Blog.utility.exception.UnprocessableEntityException;
+import com.spring.Blog.utility.exception.ExceptionMessages;
 import com.spring.Blog.utility.EntityUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ArticleService {
@@ -28,31 +26,52 @@ public class ArticleService {
     private EntityUtility entityUtility;
 
     public List<Article> getArticles() {
-        return articleRepository.findAll();
+        return entityUtility.getArticles();
     }
 
-
-
     public Article addArticle(Article article, String username, Long blogId) {
-        if (blogId == null || username.isEmpty()) {
-            throw new UnprocessableEntityException("Invalid request");
-        }
         User user = entityUtility.getUserByUsername(username);
         Blog blog = entityUtility.getBlogById(blogId);
 
-        if (entityUtility.userLogged(user) && (entityUtility.userIsOwner(blog, user) || entityUtility.userIsAdmin(user))) {
+        if (entityUtility.userLogged(user) && (entityUtility.userIsBlogOwner(blog, user) || entityUtility.userIsAdmin(user))) {
             //TODO: FIX when you add an article as admin to another user's blog it sets the owner as admin
             return saveArticle(article, blog, user);
         }
-        throw new UnauthorizedException("UNAUTHORIZED request");
+        String message = ExceptionMessages.UNAUTHORIZED.getMessage();
+        throw new UnauthorizedException(message);
+    }
+
+    public Article updateArticle(Article article, Long articleId, String username) {
+
+        User user = entityUtility.getUserByUsername(username);
+        Article articleToUpdate = entityUtility.getArticleById(articleId);
+
+        if (entityUtility.userLogged(user) && (entityUtility.userIsArticleAuthor(articleToUpdate, user) || entityUtility.userIsAdmin(user))) {
+            articleToUpdate.setTitle(article.getTitle());
+            articleToUpdate.setContent(article.getContent());
+            return articleRepository.save(articleToUpdate);
+        }
+        String message = ExceptionMessages.UNAUTHORIZED.getMessage();
+        throw new UnauthorizedException(message);
+    }
+
+    public void deleteArticle(long articleId, String username) {
+        User user = entityUtility.getUserByUsername(username);
+        Article articleToDelete = entityUtility.getArticleById(articleId);
+        if (!entityUtility.userLogged(user) && !(entityUtility.userIsArticleAuthor(articleToDelete, user) || entityUtility.userIsAdmin(user))) {
+            String message = ExceptionMessages.UNAUTHORIZED.getMessage();
+            throw new UnauthorizedException(message);
+        }
+        //TODO: delete image associated with this article
+        articleRepository.delete(articleToDelete);
+
     }
 
     public Article saveArticle(Article article, Blog blog, User user) {
         article.setBlog(blog);
         article.setAuthor(user);
-        blog.setOwner(user);
+        //blog.setOwner(user);
         blog.addArticle(article);
-
         return articleRepository.save(article);
     }
 }

@@ -4,9 +4,8 @@ import com.spring.Blog.repository.UserRepository;
 import com.spring.Blog.model.User;
 import com.spring.Blog.utility.exception.ResourceNotFoundException;
 import com.spring.Blog.utility.EntityUtility;
+import com.spring.Blog.utility.exception.ExceptionMessages;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,33 +20,34 @@ public class UserService {
     public List<User> getUsers() {
         List<User> users = userRepository.findAll();
         if (users.isEmpty()) {
-            throw new ResourceNotFoundException("No users found");
+            String message = ExceptionMessages.USERS_NOT_FOUND.getMessage();
+            throw new ResourceNotFoundException(message);
         } else {
             return users;
         }
     }
 
-    public ResponseEntity<List<User>> getAdmins() {
+    public List<User> getAdmins() {
         List<User> users = userRepository.findAll();
         users.removeIf(user -> !entityUtility.userIsAdmin(user));
         if (users.isEmpty()) {
-            throw new ResourceNotFoundException("No admins found");
-        } else {
-            return new ResponseEntity<>(users, HttpStatus.OK);
+            String message = ExceptionMessages.ADMINS_NOT_FOUND.getMessage();
+            throw new ResourceNotFoundException(message);
         }
+        return users;
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " was not found"));
+        String message = ExceptionMessages.USER_NOT_FOUND.getMessage();
+        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(message));
     }
 
     public User getAdminById(Long id) {
-        if (userRepository.findById(id).isPresent()) {
-            User user = userRepository.findById(id).get();
-            if (entityUtility.userIsAdmin(user)) {
-                return user;
-            }
+        User user = entityUtility.getUserById(id);
+        if (!entityUtility.userIsAdmin(user)) {
+            String message = ExceptionMessages.ADMIN_NOT_FOUND.getMessage();
+            throw new ResourceNotFoundException(message);
         }
-       throw new ResourceNotFoundException("Admin with id " + id + " was not found");
+        return user;
     }
 }

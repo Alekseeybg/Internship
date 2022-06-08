@@ -1,11 +1,11 @@
 package com.spring.Blog.model;
 
-import com.spring.Blog.utility.user.UserRoles;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +30,6 @@ public class User {
 
     private boolean logged;
 
-    //@Enumerated(EnumType.ORDINAL)
     private String role;
 
     @OneToMany(mappedBy = "owner")
@@ -40,7 +40,6 @@ public class User {
         this.email = email;
         this.password = password;
         this.logged = false;
-       // this.role = UserRoles.USER;
     }
 }
 

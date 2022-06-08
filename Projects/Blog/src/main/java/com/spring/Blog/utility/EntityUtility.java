@@ -1,21 +1,25 @@
 package com.spring.Blog.utility;
 
+import com.spring.Blog.model.Article;
 import com.spring.Blog.model.Blog;
 import com.spring.Blog.model.User;
 
+import com.spring.Blog.repository.ArticleRepository;
 import com.spring.Blog.repository.BlogRepository;
 import com.spring.Blog.repository.UserRepository;
+import com.spring.Blog.utility.exception.ExceptionMessages;
 import com.spring.Blog.utility.exception.ResourceNotFoundException;
+import com.spring.Blog.utility.exception.UnprocessableEntityException;
 import com.spring.Blog.utility.user.ValidationMessages;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.spring.Blog.utility.user.UserValidator.*;
 import static com.spring.Blog.utility.user.UserRoles.*;
-
 
 @Component
 @AllArgsConstructor
@@ -25,6 +29,8 @@ public class EntityUtility {
     private UserRepository userRepository;
     @Autowired
     private BlogRepository blogRepository;
+    @Autowired
+    private ArticleRepository articleRepository;
 
     public ValidationMessages validateUser(User user) {
         return (isValidName())
@@ -42,36 +48,74 @@ public class EntityUtility {
     }
 
     public boolean correctPassword(User user, String password) {
-        return user.getPassword().equals(password);
+        if (!user.getPassword().equals(password)) {
+            throw new UnprocessableEntityException("Incorrect password");
+        }
+        return true;
     }
 
     public boolean userLogged(User user) {
         return user.isLogged();
     }
 
-    public boolean userIsOwner(Blog blog, User user) {
+    public boolean userIsBlogOwner(Blog blog, User user) {
         return blog.getOwner().equals(user);
+    }
+    public boolean userIsArticleAuthor(Article article, User user) {
+        return article.getAuthor().equals(user);
     }
 
     public boolean userIsAdmin(User user) {
         return user.getRole().equals(ADMIN.getRole());
     }
 
-    public Blog getBlogById(long blogId) {
-        Optional<Blog> blog = blogRepository.findById(blogId);
-        if (blog.isPresent()) {
-            return blog.get();
-        } else {
-            throw new ResourceNotFoundException("Blog not found");
-        }
-    }
-
     public User getUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
-        if (user != null) {
-            return user;
-        } else {
-            throw new ResourceNotFoundException("User not found");
+        if (user == null) {
+            String message = ExceptionMessages.USER_NOT_FOUND.getMessage();
+            throw new ResourceNotFoundException(message);
         }
+        return user;
+    }
+
+    public User getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            String message = ExceptionMessages.USER_NOT_FOUND.getMessage();
+            throw new ResourceNotFoundException(message);
+        }
+        return user;
+    }
+
+    public User getUserById(long userId) {
+        String message = ExceptionMessages.USER_NOT_FOUND.getMessage();
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(message));
+    }
+
+    public Blog getBlogById(long blogId) {
+        String message = ExceptionMessages.BLOG_NOT_FOUND.getMessage();
+        return blogRepository.findById(blogId).orElseThrow(() -> new ResourceNotFoundException(message));
+    }
+
+    public List<Blog> getBlogs() {
+        List<Blog> blogs = blogRepository.findAll();
+        if (blogs.isEmpty()) {
+            String message = ExceptionMessages.BLOGS_NOT_FOUND.getMessage();
+            throw new ResourceNotFoundException(message);
+        }
+        return blogs;
+    }
+
+    public List<Article> getArticles() {
+        List<Article> articles = articleRepository.findAll();
+        if (articles.isEmpty()) {
+            String message = ExceptionMessages.ARTICLES_NOT_FOUND.getMessage();
+            throw new ResourceNotFoundException(message);
+        }
+        return articles;
+    }
+    public Article getArticleById(long articleId) {
+        String message = ExceptionMessages.ARTICLE_NOT_FOUND.getMessage();
+        return articleRepository.findById(articleId).orElseThrow(() -> new ResourceNotFoundException(message));
     }
 }

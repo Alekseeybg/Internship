@@ -18,7 +18,6 @@ public class AuthController {
     @PostMapping
     @RequestMapping(path = "/register")
     public ResponseEntity<User> register(@RequestBody User user, @RequestParam(name = "role", defaultValue = "USER") UserRoles role) {
-
         return new ResponseEntity<>(authService.register(user, role), HttpStatus.CREATED);
     }
 
@@ -27,12 +26,12 @@ public class AuthController {
     public ResponseEntity<User> login(@RequestBody User user) {
         User loggedUser = authService.login(user);
         return new ResponseEntity<>(loggedUser, HttpStatus.OK);
-
     }
 
     @PostMapping
     @RequestMapping(path = "/logout")
     public ResponseEntity<String> logout(@RequestBody User user) {
-        return authService.logout(user);
+        authService.logout(user);
+        return new ResponseEntity<>("User logged out", HttpStatus.NO_CONTENT);
     }
 }

@@ -4,12 +4,10 @@ import com.spring.Blog.model.Blog;
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.BlogRepository;
 import com.spring.Blog.repository.UserRepository;
-import com.spring.Blog.utility.exception.ResourceNotFoundException;
 import com.spring.Blog.utility.exception.UnauthorizedException;
 import com.spring.Blog.utility.EntityUtility;
+import com.spring.Blog.utility.exception.ExceptionMessages;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,59 +24,40 @@ public class BlogService {
 
 
     public List<Blog> getBlogs() {
-        List<Blog> blogs = blogRepository.findAll();
-        if (blogs.isEmpty()) {
-            throw new ResourceNotFoundException("No blogs found");
-        } else {
-            return blogs;
-        }
+        return entityUtility.getBlogs();
     }
 
     public Blog addBlog(Blog blog, String username) {
-        if (!entityUtility.userExists(username)) {
-            throw new ResourceNotFoundException("User not found");
-        }
-        User user = userRepository.findByUsername(username);
+        User user = entityUtility.getUserByUsername(username);
 
-        if (entityUtility.userLogged(user)) {
-            blog.setOwner(user);
-            return blogRepository.save(blog);
-        } else {
-            throw new UnauthorizedException("UNAUTHORIZED request");
+        if (!entityUtility.userLogged(user)) {
+            String message = ExceptionMessages.UNAUTHORIZED.getMessage();
+            throw new UnauthorizedException(message);
         }
+        blog.setOwner(user);
+        return blogRepository.save(blog);
     }
 
-    public ResponseEntity<String> deleteBlog(long blogId, String username) {
-        if (!entityUtility.userExists(username)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        User user = userRepository.findByUsername(username);
+    public void deleteBlog(long blogId, String username) {
+        User user = entityUtility.getUserByUsername(username);
+        Blog blogToDelete = entityUtility.getBlogById(blogId);
 
-        if (entityUtility.userLogged(user)) {
-            if (blogRepository.findById(blogId).isPresent()) {
-                Blog blogToDelete = blogRepository.findById(blogId).get();
-                if (entityUtility.userIsOwner(blogToDelete, user)) {
-                    blogRepository.deleteById(blogId);
-                    return new ResponseEntity<>("Blog deleted successfully", HttpStatus.OK);
-                } else {
-                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-                }
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        if (!entityUtility.userLogged(user) && (!entityUtility.userIsBlogOwner(blogToDelete, user) || !entityUtility.userIsAdmin(user))) {
+            String message = ExceptionMessages.UNAUTHORIZED.getMessage();
+            throw new UnauthorizedException(message);
         }
+        blogRepository.deleteById(blogId);
     }
 
     public Blog updateBlog(Blog blog, long blogId, String username) {
         User user = entityUtility.getUserByUsername(username);
         Blog blogToUpdate = entityUtility.getBlogById(blogId);
-        if (entityUtility.userLogged(user) && entityUtility.userIsOwner(blogToUpdate, user)) {
-            blogToUpdate.setTitle(blog.getTitle());
-            return blogRepository.save(blogToUpdate);
-        } else {
-           throw new UnauthorizedException("UNAUTHORIZED request");
+
+        if (!entityUtility.userLogged(user) && (!entityUtility.userIsBlogOwner(blogToUpdate, user) || !entityUtility.userIsAdmin(user))) {
+            String message = ExceptionMessages.UNAUTHORIZED.getMessage();
+            throw new UnauthorizedException(message);
         }
+        blogToUpdate.setTitle(blog.getTitle());
+        return blogRepository.save(blogToUpdate);
     }
 }

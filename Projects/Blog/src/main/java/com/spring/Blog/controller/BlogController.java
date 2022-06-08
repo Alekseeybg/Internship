@@ -29,7 +29,8 @@ public class BlogController {
 
     @DeleteMapping(path = "/{blogId}")
     public ResponseEntity<String> deleteBlog(@PathVariable("blogId") long blogId, @RequestParam(name = "user") String username) {
-        return blogService.deleteBlog(blogId, username);
+        blogService.deleteBlog(blogId, username);
+        return new ResponseEntity<>("Blog deleted", HttpStatus.NO_CONTENT);
     }
 
     @PutMapping(path = "/{blogId}")

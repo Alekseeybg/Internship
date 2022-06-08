@@ -22,36 +22,24 @@ public class UserController {
     @GetMapping
     @RequestMapping(path = "/users")
     public ResponseEntity<List<User>> getUsers() {
-        return !userService.getUsers().isEmpty() ?
-                new ResponseEntity<>(userService.getUsers(), HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
     }
 
     @GetMapping
     @RequestMapping(path = "/admins")
     public ResponseEntity<List<User>> getAdmins() {
-        return userService.getAdmins();
+        return new ResponseEntity<>(userService.getAdmins(), HttpStatus.OK);
     }
 
     @GetMapping
     @RequestMapping(value = "/admins/{id}")
     public ResponseEntity<User> getAdminById(@PathVariable("id") Long id) {
-        User user = userService.getAdminById(id);
-        if (userService.getAdminById(id) != null) {
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(userService.getAdminById(id), HttpStatus.OK);
     }
 
     @GetMapping
     @RequestMapping(value = "/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
-        User user = userService.getUserById(id);
-        if (userService.getUserById(id) != null) {
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 }

@@ -2,16 +2,14 @@ package com.spring.Blog.service;
 
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.UserRepository;
-import com.spring.Blog.utility.exception.ResourceNotFoundException;
 import com.spring.Blog.utility.exception.UnauthorizedException;
 import com.spring.Blog.utility.exception.UnprocessableEntityException;
 import com.spring.Blog.utility.user.UserRoles;
 import com.spring.Blog.utility.EntityUtility;
 import com.spring.Blog.utility.user.ValidationMessages;
+import com.spring.Blog.utility.exception.ExceptionMessages;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -29,35 +27,30 @@ public class AuthService {
         if (result != SUCCESS) {
             throw new UnprocessableEntityException(result.getMessage());
         } else if (entityUtility.userExists(user.getUsername()) || entityUtility.emailExists(user.getEmail())) {
-            throw new UnprocessableEntityException("Username or Email already exists");
+            String message = ExceptionMessages.USERNAME_EMAIL_EXISTS.getMessage();
+            throw new UnprocessableEntityException(message);
         }
         user.setRole(role.getRole());
         return userRepository.save(user);
     }
 
     public User login(@RequestBody User user) {
-        if (!entityUtility.emailExists(user.getEmail())) {
-            throw new ResourceNotFoundException("Email not found");
-        } else {
-            User userDb = userRepository.findByEmail(user.getEmail());
-            if (!entityUtility.correctPassword(userDb, user.getPassword())) {
-                throw new UnauthorizedException("Incorrect password");
-            } else {
-                userDb.setLogged(true);
-                return userRepository.save(userDb);
-            }
+        User userDb = entityUtility.getUserByEmail(user.getEmail());
+        if (!entityUtility.correctPassword(userDb, user.getPassword())) {
+            String message = ExceptionMessages.INCORRECT_PASSWORD.getMessage();
+            throw new UnauthorizedException(message);
         }
+        userDb.setLogged(true);
+        return userRepository.save(userDb);
     }
 
-    public ResponseEntity<String> logout(@RequestBody User user) {
-        if (entityUtility.emailExists(user.getEmail())) {
-            User userDb = userRepository.findByEmail(user.getEmail());
-            if (entityUtility.userLogged(userDb)) {
-                userDb.setLogged(false);
-                userRepository.save(userDb);
-                return new ResponseEntity<>("User logged out", HttpStatus.NO_CONTENT);
-            }
+    public void logout(@RequestBody User user) {
+        User userDb = entityUtility.getUserByEmail(user.getEmail());
+        if (!entityUtility.userLogged(userDb)) {
+            String message = ExceptionMessages.USER_NOT_LOGGED.getMessage();
+            throw new UnauthorizedException(message);
         }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        userDb.setLogged(false);
+        userRepository.save(userDb);
     }
 }
