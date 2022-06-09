@@ -2,7 +2,6 @@ package com.spring.Blog.controller;
 
 import com.spring.Blog.service.UserService;
 import com.spring.Blog.model.User;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,77 +1,61 @@
 package com.spring.Blog.controller;
 
 import com.spring.Blog.model.Image;
+import com.spring.Blog.repository.ArticleRepository;
 import com.spring.Blog.repository.ImageRepository;
-import com.spring.Blog.service.FilesStorageService;
+import com.spring.Blog.service.ImageService;
+import com.spring.Blog.utility.EntityUtility;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Controller
+@RestController
+@RequestMapping(path = "api/v1")
 public class ImageController {
     @Autowired
-    FilesStorageService storageService;
+    private ImageService imageService;
+
     @Autowired
     private ImageRepository imageRepository;
+    @Autowired
+    private EntityUtility entityUtility;
 
-    @PostMapping("/api/v1/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        String message = "";
-        try {
-            storageService.save(file);
-            String url = "http://localhost:8080/files/" + file.getOriginalFilename();
-            Image image = new Image(file.getOriginalFilename(), url);
-            imageRepository.save(image);
-            message = "Uploaded the file successfully: " + file.getOriginalFilename();
-            return ResponseEntity.status(HttpStatus.OK).body(message);
-        } catch (Exception e) {
-            message = "Could not upload the file: " + file.getOriginalFilename() + "!";
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
-        }
+    @Autowired
+    private ArticleRepository articleRepository;
+
+    @PostMapping("/articles/{id}/upload")
+    public ResponseEntity<Image> uploadFile(@RequestParam("file") MultipartFile file,
+                                            @PathVariable("id") Long article_id) {
+        return new ResponseEntity<>(imageService.uploadFile(file, article_id), HttpStatus.OK);
     }
 
     @GetMapping("/files")
     public ResponseEntity<List<Image>> getListFiles() {
-        List<Image> images = storageService.loadAll().map(path -> {
-            String filename = path.getFileName().toString();
-            String url = MvcUriComponentsBuilder
-                    .fromMethodName(ImageController.class, "getFile", path.getFileName().toString()).build().toString();
-            return new Image(filename, url);
-        }).collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(images);
+        return new ResponseEntity<>(imageService.getAllFiles(), HttpStatus.OK);
     }
 
-    @GetMapping("/files/{filename:.+}")
-    @ResponseBody
-    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-        final Image image = imageRepository.findByFilename(filename);
-
-        Resource file;
-        if (image != null) {
-            file = storageService.loadAsResource(filename);
-        } else {
-            file = storageService.load(filename);
-        }
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
-                .body(file);
+    @GetMapping("/files/{id}")
+    public ResponseEntity<Image> getFile(@PathVariable("id") Long id) {
+        return new ResponseEntity<>(imageService.getFile(id), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/files2/{filename:.+}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> fromClasspathAsResEntity(@PathVariable String filename) throws IOException {
+    @DeleteMapping("/files/{id}")
+    public ResponseEntity<String> deleteFile(@PathVariable("id") Long id) {
+        Image image = entityUtility.getImageById(id);
+        return new ResponseEntity<>(imageService.delete(id), HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping(value = "/files/{filename:.+}", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_GIF_VALUE})
+    public ResponseEntity<byte[]> showFile(@PathVariable String filename) throws IOException {
         ClassPathResource imageFile = new ClassPathResource("static/images/" + filename);
         byte[] imageBytes = StreamUtils.copyToByteArray(imageFile.getInputStream());
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);

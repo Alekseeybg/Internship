@@ -13,7 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter
 @Setter
-@JsonIgnoreProperties("article_id")
+@JsonIgnoreProperties("article")
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

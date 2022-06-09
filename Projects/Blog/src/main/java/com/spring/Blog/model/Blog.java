@@ -27,7 +27,7 @@ public class Blog {
     @JoinColumn(name = "user_id")
     private User owner;
 
-    @OneToMany(mappedBy = "blog", cascade = CascadeType.REMOVE)
+    @OneToMany(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "article_id")
     private List<Article> articles = new ArrayList<>();
 

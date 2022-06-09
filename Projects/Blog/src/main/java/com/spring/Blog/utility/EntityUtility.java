@@ -2,10 +2,12 @@ package com.spring.Blog.utility;
 
 import com.spring.Blog.model.Article;
 import com.spring.Blog.model.Blog;
+import com.spring.Blog.model.Image;
 import com.spring.Blog.model.User;
 
 import com.spring.Blog.repository.ArticleRepository;
 import com.spring.Blog.repository.BlogRepository;
+import com.spring.Blog.repository.ImageRepository;
 import com.spring.Blog.repository.UserRepository;
 import com.spring.Blog.utility.exception.ExceptionMessages;
 import com.spring.Blog.utility.exception.ResourceNotFoundException;
@@ -16,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.spring.Blog.utility.user.UserValidator.*;
 import static com.spring.Blog.utility.user.UserRoles.*;
@@ -31,6 +32,8 @@ public class EntityUtility {
     private BlogRepository blogRepository;
     @Autowired
     private ArticleRepository articleRepository;
+    @Autowired
+    private ImageRepository imageRepository;
 
     public ValidationMessages validateUser(User user) {
         return (isValidName())
@@ -61,6 +64,7 @@ public class EntityUtility {
     public boolean userIsBlogOwner(Blog blog, User user) {
         return blog.getOwner().equals(user);
     }
+
     public boolean userIsArticleAuthor(Article article, User user) {
         return article.getAuthor().equals(user);
     }
@@ -114,8 +118,32 @@ public class EntityUtility {
         }
         return articles;
     }
+
     public Article getArticleById(long articleId) {
         String message = ExceptionMessages.ARTICLE_NOT_FOUND.getMessage();
         return articleRepository.findById(articleId).orElseThrow(() -> new ResourceNotFoundException(message));
+    }
+
+    public boolean articleImageExists(long articleId) {
+        Article article = articleRepository.findById(articleId).orElseThrow(() -> new ResourceNotFoundException(ExceptionMessages.ARTICLE_NOT_FOUND.getMessage()));
+        return article.getImage() != null;
+    }
+
+    public void replaceImage(long articleId, Image image) {
+        Article article = articleRepository.findById(articleId).orElseThrow(() -> new ResourceNotFoundException(ExceptionMessages.ARTICLE_NOT_FOUND.getMessage()));
+        article.setImage(image);
+        articleRepository.save(article);
+    }
+
+    public Image getImageById(long imageId) {
+        String message = ExceptionMessages.IMAGE_NOT_FOUND.getMessage();
+        return imageRepository.findById(imageId).orElseThrow(() -> new ResourceNotFoundException(message));
+    }
+
+    public void deleteImageIfExists(Image image) {
+        if (image == null) {
+            throw new ResourceNotFoundException(ExceptionMessages.IMAGE_NOT_FOUND.getMessage());
+        }
+        imageRepository.delete(image);
     }
 }

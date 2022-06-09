@@ -23,10 +23,6 @@ public class Article {
 
     private String content;
 
-    @OneToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "image_id")
-    private long image_id;
-
     @ManyToOne
     @JoinColumn(name = "blog_id")
     private Blog blog;
@@ -35,16 +31,11 @@ public class Article {
     @JoinColumn(name = "author_id")
     private User author;
 
+    @OneToOne(mappedBy = "article", cascade = CascadeType.REMOVE)
+    private Image image;
+
     public Article(String title, String content) {
         this.title = title;
         this.content = content;
-    }
-
-   public long getImage_id() {
-        return image_id;
-    }
-
-    public void setImage_id(long image_id) {
-        this.image_id = image_id;
     }
 }
