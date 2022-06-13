@@ -16,6 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @JsonIgnoreProperties("owner")
+@Table(name = "blog")
 public class Blog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,8 +28,7 @@ public class Blog {
     @JoinColumn(name = "user_id")
     private User owner;
 
-    @OneToMany(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "article_id")
+    @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Article> articles = new ArrayList<>();
 
     public Blog(String title) {

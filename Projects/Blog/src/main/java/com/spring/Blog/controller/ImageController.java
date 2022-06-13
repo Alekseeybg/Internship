@@ -19,42 +19,42 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/v1")
+@RequestMapping(path = "api/v1/files")
 public class ImageController {
     @Autowired
     private ImageService imageService;
 
     @Autowired
     private ImageRepository imageRepository;
+
     @Autowired
     private EntityUtility entityUtility;
 
     @Autowired
     private ArticleRepository articleRepository;
 
-    @PostMapping("/articles/{id}/upload")
+    @PostMapping("/{articleId}")
     public ResponseEntity<Image> uploadFile(@RequestParam("file") MultipartFile file,
-                                            @PathVariable("id") Long article_id) {
+                                            @PathVariable("articleId") long article_id) {
         return new ResponseEntity<>(imageService.uploadFile(file, article_id), HttpStatus.OK);
     }
 
-    @GetMapping("/files")
+    @GetMapping
     public ResponseEntity<List<Image>> getListFiles() {
         return new ResponseEntity<>(imageService.getAllFiles(), HttpStatus.OK);
     }
 
-    @GetMapping("/files/{id}")
-    public ResponseEntity<Image> getFile(@PathVariable("id") Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Image> getFile(@PathVariable("id") long id) {
         return new ResponseEntity<>(imageService.getFile(id), HttpStatus.OK);
     }
 
-    @DeleteMapping("/files/{id}")
-    public ResponseEntity<String> deleteFile(@PathVariable("id") Long id) {
-        Image image = entityUtility.getImageById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteFile(@PathVariable("id") long id, @RequestParam(name = "user") String username) {
         return new ResponseEntity<>(imageService.delete(id), HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(value = "/files/{filename:.+}", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_GIF_VALUE})
+    @GetMapping(value = "/view/{filename:.+}", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_GIF_VALUE})
     public ResponseEntity<byte[]> showFile(@PathVariable String filename) throws IOException {
         ClassPathResource imageFile = new ClassPathResource("static/images/" + filename);
         byte[] imageBytes = StreamUtils.copyToByteArray(imageFile.getInputStream());

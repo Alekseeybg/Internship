@@ -68,7 +68,6 @@ public class EntityUtility {
     public boolean userIsArticleAuthor(Article article, User user) {
         return article.getAuthor().equals(user);
     }
-
     public boolean userIsAdmin(User user) {
         return user.getRole().equals(ADMIN.getRole());
     }
@@ -145,5 +144,6 @@ public class EntityUtility {
             throw new ResourceNotFoundException(ExceptionMessages.IMAGE_NOT_FOUND.getMessage());
         }
         imageRepository.delete(image);
+        imageRepository.flush();
     }
 }

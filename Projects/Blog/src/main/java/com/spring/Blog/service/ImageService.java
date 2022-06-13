@@ -17,6 +17,7 @@ import com.spring.Blog.utility.exception.ExceptionMessages;
 import com.spring.Blog.utility.exception.ResourceNotFoundException;
 import com.spring.Blog.utility.exception.UnprocessableEntityException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class ImageService {
 
-    private final Path root = Paths.get("src/main/resources/static/images");
+    //private final Path root = Paths.get("src/main/resources/static/images");
+    @Value("${images.root.path}")
+    private String root;
     @Autowired
     private ImageRepository imageRepository;
     @Autowired
@@ -34,11 +37,13 @@ public class ImageService {
 
     public void init() {
         try {
-            Files.createDirectory(root);
+            Path path = Paths.get(root);
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+            }
         } catch (IOException e) {
             throw new RuntimeException("Could not initialize folder for upload!");
         }
-        System.out.println("Image directory created");
     }
 
 
@@ -47,7 +52,7 @@ public class ImageService {
         Image image;
         try {
             saveFile(file);
-            String url = "http://localhost:8080/files/" + file.getOriginalFilename();
+            String url = "http://localhost:8080/api/v1/files/" + file.getOriginalFilename();
             image = new Image(file.getOriginalFilename(), url);
             if (entityUtility.articleImageExists(article_id)) {
                 entityUtility.replaceImage(article_id, image);
@@ -64,11 +69,11 @@ public class ImageService {
 
     private void saveFile(MultipartFile file) {
         try {
-            File file1 = new File(root + "/" + file.getOriginalFilename());
+            File file1 = new File(Paths.get(root) + "/" + file.getOriginalFilename());
             if (file1.exists()) {
                 deleteFile(file.getOriginalFilename());
             }
-            Files.copy(file.getInputStream(), root.resolve(Objects.requireNonNull(file.getOriginalFilename())));
+            Files.copy(file.getInputStream(), Paths.get(root).resolve(Objects.requireNonNull(file.getOriginalFilename())));
         } catch (Exception e) {
             throw new RuntimeException("Could not store file " + file.getOriginalFilename() + ". Please try again!");
         }
@@ -76,7 +81,7 @@ public class ImageService {
 
     private void deleteFile(String filename) {
         try {
-            Files.deleteIfExists(root.resolve(filename));
+            Files.deleteIfExists(Paths.get(root).resolve(filename));
         } catch (IOException e) {
             throw new RuntimeException("Could not delete file " + filename + ". Please try again!");
         }
@@ -98,7 +103,7 @@ public class ImageService {
         try {
             Image image = entityUtility.getImageById(id);
             entityUtility.deleteImageIfExists(image);
-            Files.deleteIfExists(root.resolve(image.getFilename()));
+            Files.deleteIfExists(Paths.get(root).resolve(image.getFilename()));
         } catch (IOException e) {
             throw new UnprocessableEntityException("Could not delete file. Error: " + e.getMessage());
         }
@@ -106,8 +111,8 @@ public class ImageService {
     }
 
     public void deleteAll() {
-        FileSystemUtils.deleteRecursively(root.toFile());
+        FileSystemUtils.deleteRecursively(Paths.get("resources/").toFile());
+        FileSystemUtils.deleteRecursively(Paths.get(root).toFile());
         imageRepository.deleteAll();
-        System.out.println("All images deleted");
     }
 }

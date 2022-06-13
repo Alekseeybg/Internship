@@ -23,7 +23,7 @@ public class Image {
     private String url;
 
     @OneToOne
-    @JoinColumn(name = "article_id")
+    @JoinColumn(name = "article_id", referencedColumnName = "id")
     private Article article;
 
     public Image(String filename, String url) {

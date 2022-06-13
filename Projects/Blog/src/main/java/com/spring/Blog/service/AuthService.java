@@ -22,7 +22,7 @@ public class AuthService {
     @Autowired
     private EntityUtility entityUtility;
 
-    public User register(User user, UserRoles role) {
+    public User register(@RequestBody User user, UserRoles role) {
         ValidationMessages result = entityUtility.validateUser(user);
         if (result != SUCCESS) {
             throw new UnprocessableEntityException(result.getMessage());

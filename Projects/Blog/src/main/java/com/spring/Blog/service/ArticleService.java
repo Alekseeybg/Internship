@@ -62,9 +62,7 @@ public class ArticleService {
             String message = ExceptionMessages.UNAUTHORIZED.getMessage();
             throw new UnauthorizedException(message);
         }
-        //TODO: delete image associated with this article
-        articleRepository.delete(articleToDelete);
-
+         articleRepository.delete(articleToDelete);
     }
 
     public Article saveArticle(Article article, Blog blog, User user) {
