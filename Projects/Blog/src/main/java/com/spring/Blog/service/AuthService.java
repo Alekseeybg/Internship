@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import static com.spring.Blog.utility.user.UserValidator.*;
+import static com.spring.Blog.utility.user.UserValidator.isValidPassword;
 import static com.spring.Blog.utility.user.ValidationMessages.SUCCESS;
 
 @Service
@@ -23,7 +25,7 @@ public class AuthService {
     private EntityUtility entityUtility;
 
     public User register(@RequestBody User user, UserRoles role) {
-        ValidationMessages result = entityUtility.validateUser(user);
+        ValidationMessages result = validateUser(user);
         if (result != SUCCESS) {
             throw new UnprocessableEntityException(result.getMessage());
         } else if (entityUtility.userExists(user.getUsername()) || entityUtility.emailExists(user.getEmail())) {
@@ -52,5 +54,13 @@ public class AuthService {
         }
         userDb.setLogged(false);
         userRepository.save(userDb);
+    }
+
+    private ValidationMessages validateUser(User user) {
+        return (usernameIsNotNull())
+                .and(isValidName())
+                .and(isValidEmail())
+                .and(isValidPassword())
+                .apply(user);
     }
 }

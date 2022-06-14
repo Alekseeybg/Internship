@@ -35,12 +35,7 @@ public class EntityUtility {
     @Autowired
     private ImageRepository imageRepository;
 
-    public ValidationMessages validateUser(User user) {
-        return (isValidName())
-                .and(isValidEmail())
-                .and(isValidPassword())
-                .apply(user);
-    }
+
 
     public boolean userExists(String username) {
         return userRepository.findByUsername(username) != null;

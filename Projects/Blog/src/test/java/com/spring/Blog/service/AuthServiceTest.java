@@ -3,11 +3,9 @@ package com.spring.Blog.service;
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.UserRepository;
 import com.spring.Blog.utility.EntityUtility;
-import com.spring.Blog.utility.exception.UnauthorizedException;
+import com.spring.Blog.utility.exception.ResourceNotFoundException;
 import com.spring.Blog.utility.exception.UnprocessableEntityException;
 import com.spring.Blog.utility.user.UserRoles;
-import com.sun.xml.bind.v2.TODO;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -15,10 +13,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static com.spring.Blog.utility.exception.ExceptionMessages.USERNAME_EMAIL_EXISTS;
+import java.util.Optional;
+
+import static com.spring.Blog.utility.exception.ExceptionMessages.*;
 import static com.spring.Blog.utility.user.ValidationMessages.*;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class AuthServiceTest {
@@ -29,105 +29,117 @@ public class AuthServiceTest {
     @Mock
     private EntityUtility entityUtility;
     private User user;
+    private User userLogin;
+    private String result;
     private AutoCloseable closeable;
 
     @Before
     public void setUp() {
-        closeable = MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.openMocks(this);
         user = new User("User", "user@mail.com", "p@SSw0rd");
+        userLogin = new User("user@mail.com","p@SSw0rd");
+        result = null;
     }
 
-    @After
-    public void releaseMocks() throws Exception {
-        closeable.close();
-    }
-
-
-    private void validateUser(User user) {
-        when(entityUtility.validateUser(user)).thenReturn(NAME_IS_NOT_VALID);
+    @Test
+    public void givenNullUsernameThenReturnValidationMessage() {
+        user.setUsername(null);
         try {
             authService.register(user, UserRoles.USER);
         } catch (UnprocessableEntityException e) {
-            assertEquals(e.getMessage(), NAME_IS_NOT_VALID.getMessage());
+            result = e.getMessage();
         }
-    }
-
-    private void validatePassword(User user) {
-        when(entityUtility.validateUser(user)).thenReturn(PASSWORD_IS_NOT_VALID);
-        try {
-            authService.register(user, UserRoles.USER);
-        } catch (UnprocessableEntityException e) {
-            assertEquals(e.getMessage(), PASSWORD_IS_NOT_VALID.getMessage());
-        }
-    }
-    //@Test(expected = NullPointerException.class)
-    //public void givenNullUsernameThenReturnValidationMessage() {
-    //   user.setUsername(null);
-    // }
-
-    @Test
-    public void givenEmptyUsernameThenReturnValidationMessage() {
-        user.setUsername("");
-        validateUser(user);
+        assertEquals(result, NAME_IS_NULL.getMessage());
     }
 
     @Test
-    public void givenUsernameWithForbiddenSymbolsThenReturnValidationMessage() {
-        user.setUsername("Adf@S");
-        validateUser(user);
-    }
-
-    @Test
-    public void givenUsernameTooShortSymbolsThenReturnValidationMessage() {
+    public void givenInvalidUsernameThenReturnValidationMessage() {
         user.setUsername("ad");
-        validateUser(user);
+        try {
+            authService.register(user, UserRoles.USER);
+        } catch (UnprocessableEntityException e) {
+            result = e.getMessage();
+        }
+        assertEquals(result, NAME_IS_NOT_VALID.getMessage());
     }
 
     @Test
-    public void givenPasswordTooShortWhenRegisterThenReturnValidationMessage() {
+    public void givenNullPasswordThenReturnValidationMessage() {
+        user.setPassword(null);
+        try {
+            authService.register(user, UserRoles.USER);
+        } catch (UnprocessableEntityException e) {
+            result = e.getMessage();
+        }
+        assertEquals(result, PASSWORD_IS_NULL.getMessage());
+    }
+
+    @Test
+    public void givenInvalidPasswordWhenRegisterThenReturnValidationMessage() {
         user.setPassword("");
-        validatePassword(user);
+        try {
+            authService.register(user, UserRoles.USER);
+        } catch (UnprocessableEntityException e) {
+            result = e.getMessage();
+        }
+        assertEquals(result, PASSWORD_IS_NOT_VALID.getMessage());
     }
 
     @Test
-    public void givenTooShortPasswordWhenRegisterThenReturnValidationMessage() {
-        user.setPassword("123");
-        validatePassword(user);
+    public void givenNullEmailThenReturnValidationMessage() {
+        user.setEmail(null);
+        try {
+            authService.register(user, UserRoles.USER);
+        } catch (UnprocessableEntityException e) {
+            result = e.getMessage();
+        }
+        assertEquals(result, EMAIL_IS_NULL.getMessage());
     }
 
     @Test
-    public void givenPasswordWihtNoDigitsWhenRegisterThenReturnValidationMessage() {
-        user.setPassword("P@assWord");
-        validatePassword(user);
+    public void givenInvalidEmailThenReturnValidationMessage() {
+        user.setEmail("emailgmail.com");
+        try {
+            authService.register(user, UserRoles.USER);
+        } catch (UnprocessableEntityException e) {
+            result = e.getMessage();
+        }
+        assertEquals(result, EMAIL_IS_NOT_VALID.getMessage());
     }
 
     @Test
-    public void givenPasswordWihtNoUpperCaseLetterWhenRegisterThenReturnValidationMessage() {
-        user.setPassword("p@assW0rd");
-        validatePassword(user);
-    }
-
-    @Test
-    public void givenPasswordWihtNoLowerCaseLetterWhenRegisterThenReturnValidationMessage() {
-        user.setPassword("P@ASSW0RD");
-        validatePassword(user);
-    }
-
-    @Test
-    public void givenPasswordWihtNoSpecialSymbolWhenRegisterThenReturnValidationMessage() {
-        user.setPassword("Passw0rd");
-        validatePassword(user);
-    }
-
-    @Test(expected = UnprocessableEntityException.class)
-    public void givenEmailExistsWhenRegisterThenThrowException() {
-        //  TODO: fix this test
-        User user1 = new User("User1", "user@mail.com", "p@SSw0rd");
-        when(entityUtility.emailExists(user1.getEmail())).thenThrow(new UnprocessableEntityException(USERNAME_EMAIL_EXISTS.getMessage()));
+    public void givenUsernameExistsWhenRegisterThenThrowException() {
+        User user1 = new User("User", "user2@mail.com", "p@SSw0rd");
         try {
             authService.register(user1, UserRoles.USER);
         } catch (UnprocessableEntityException e) {
-            assertEquals(e.getMessage(), USERNAME_EMAIL_EXISTS.getMessage());
+            result = e.getMessage();
         }
+        assertEquals(result, USERNAME_EMAIL_EXISTS.getMessage());
+    }
+
+    @Test
+    public void givenEmailExistsWhenRegisterThenThrowException() {
+        User user1 = new User("User2", "user@mail.com", "p@SSw0rd");
+        try {
+            authService.register(user1, UserRoles.USER);
+        } catch (UnprocessableEntityException e) {
+            result = e.getMessage();
+        }
+        assertEquals(result, USERNAME_EMAIL_EXISTS.getMessage());
+    }
+
+    //Login
+    @Test
+    public void givenWrongEmailWhenLoginThenReturnValidationMessage() {
+        user.setEmail("");
+        when(authService.login(user)).thenThrow(ResourceNotFoundException.class);
+
+        try {
+            authService.login(user);
+        } catch (ResourceNotFoundException e) {
+            result = e.getMessage();
+        }
+        assertEquals(result, USER_NOT_FOUND.getMessage());
     }
 }
