@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static org.hibernate.cfg.AvailableSettings.USER;
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,9 +43,19 @@ public class User {
         this.password = password;
         this.logged = false;
     }
+
+    public User(String username, String email, String password, String role) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.logged = false;
+        this.role = role;
+    }
+
     public User(String email, String password) {
         this.email = email;
         this.password = password;
+        this.logged = false;
     }
 }
 

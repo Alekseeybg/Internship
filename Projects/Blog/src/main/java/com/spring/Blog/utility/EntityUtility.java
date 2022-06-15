@@ -35,8 +35,6 @@ public class EntityUtility {
     @Autowired
     private ImageRepository imageRepository;
 
-
-
     public boolean userExists(String username) {
         return userRepository.findByUsername(username) != null;
     }
