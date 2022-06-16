@@ -53,6 +53,18 @@ public class UserServiceTest {
     }
 
     @Test
+    public void givenUsersInRepositoryWhenLookingForUsersReturnUsers() {
+        List<User> users1 = new ArrayList<>();
+        when(userRepository.findAll()).thenReturn(users);
+        try {
+            users1 = userService.getUsers();
+        } catch (ResourceNotFoundException e) {
+            assertEquals(e.getMessage(), USERS_NOT_FOUND.getMessage());
+        }
+        assertEquals(users, users1);
+    }
+
+    @Test
     public void givenNoAdminsInRepositoryWhenLookingForAdminsThrowException() {
         when(userRepository.findAll()).thenReturn(users);
         when(admins.removeIf(admin -> !entityUtility.userIsAdmin(admin))).thenReturn(true);
@@ -61,33 +73,51 @@ public class UserServiceTest {
         } catch (ResourceNotFoundException e) {
             assertEquals(e.getMessage(), ADMINS_NOT_FOUND.getMessage());
         }
-        assertThrows(ResourceNotFoundException.class, () -> userService.getAdmins());
     }
 
     @Test
-    public void givenUserIdWhenLookingForUserThrowException() {
+    public void givenWrongUserIdWhenLookingForUserThrowException() {
         doReturn(Optional.empty()).when(userRepository).findById(1L);
-        //User userByService = userService.getUserById(1L);
-        //when(userRepository.findById(anyLong()).orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND.getMessage()))).thenReturn(user);
-
         try {
             userService.getUserById(1L);
         } catch (ResourceNotFoundException e) {
             assertEquals(e.getMessage(), USER_NOT_FOUND.getMessage());
         }
-        assertThrows(ResourceNotFoundException.class, () -> userService.getUserById(1L));
     }
 
     @Test
-    public void givenAdminIdWhenLookingForAdminThrowException() {
-        //doReturn(user).when(userRepository).findById(1L);
+    public void givenCorrectUserIdWhenLookingForUserReturnUser() {
+        User user1 = new User();
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+        try {
+            user1 = userService.getUserById(1L);
+        } catch (ResourceNotFoundException e) {
+            assertEquals(e.getMessage(), USER_NOT_FOUND.getMessage());
+        }
+        assertEquals(user, user1);
+    }
+
+    @Test
+    public void givenWrongAdminIdWhenLookingForAdminThrowException() {
         when(entityUtility.getUserById(1L)).thenReturn(user);
         try {
             userService.getAdminById(1L);
         } catch (ResourceNotFoundException e) {
             assertEquals(e.getMessage(), ADMIN_NOT_FOUND.getMessage());
         }
-        assertThrows(ResourceNotFoundException.class, () -> userService.getAdminById(1L));
+    }
+
+    @Test
+    public void givenCorrectAdminIdWhenLookingForAdminThrowException() {
+        User admin1 = new User();
+        when(entityUtility.getUserById(1L)).thenReturn(admin);
+        when(entityUtility.userIsAdmin(admin)).thenReturn(true);
+        try {
+           admin1 =  userService.getAdminById(1L);
+        } catch (ResourceNotFoundException e) {
+            assertEquals(e.getMessage(), ADMIN_NOT_FOUND.getMessage());
+        }
+        assertEquals(admin, admin1);
     }
 
 
