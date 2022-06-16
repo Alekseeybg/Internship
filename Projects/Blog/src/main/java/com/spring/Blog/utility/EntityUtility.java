@@ -132,11 +132,12 @@ public class EntityUtility {
         return imageRepository.findById(imageId).orElseThrow(() -> new ResourceNotFoundException(message));
     }
 
-    public void deleteImageIfExists(Image image) {
+    public boolean deleteImageIfExists(Image image) {
         if (image == null) {
             throw new ResourceNotFoundException(ExceptionMessages.IMAGE_NOT_FOUND.getMessage());
         }
         imageRepository.delete(image);
         imageRepository.flush();
+        return true;
     }
 }

@@ -3,7 +3,7 @@ package com.spring.Blog.service;
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.UserRepository;
 import com.spring.Blog.utility.EntityUtility;
-import com.spring.Blog.utility.user.UserRoles;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -11,15 +11,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import com.spring.Blog.utility.exception.ResourceNotFoundException;
 
-import static com.spring.Blog.utility.user.UserRoles.ADMIN;
-import static com.spring.Blog.utility.user.UserRoles.USER;
+import static com.spring.Blog.utility.user.UserRoles.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static com.spring.Blog.utility.exception.ExceptionMessages.*;
 import static com.spring.Blog.utility.user.ValidationMessages.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,13 +85,11 @@ public class UserServiceTest {
 
     @Test
     public void givenCorrectUserIdWhenLookingForUserReturnUser() {
-        User user1 = new User();
+        User user1;
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
-        try {
-            user1 = userService.getUserById(1L);
-        } catch (ResourceNotFoundException e) {
-            assertEquals(e.getMessage(), USER_NOT_FOUND.getMessage());
-        }
+
+        user1 = userService.getUserById(1L);
+
         assertEquals(user, user1);
     }
 
@@ -108,15 +104,13 @@ public class UserServiceTest {
     }
 
     @Test
-    public void givenCorrectAdminIdWhenLookingForAdminThrowException() {
-        User admin1 = new User();
+    public void givenCorrectAdminIdWhenLookingForAdminReturnAdmin() {
+        User admin1;
         when(entityUtility.getUserById(1L)).thenReturn(admin);
         when(entityUtility.userIsAdmin(admin)).thenReturn(true);
-        try {
-           admin1 =  userService.getAdminById(1L);
-        } catch (ResourceNotFoundException e) {
-            assertEquals(e.getMessage(), ADMIN_NOT_FOUND.getMessage());
-        }
+
+        admin1 = userService.getAdminById(1L);
+
         assertEquals(admin, admin1);
     }
 

@@ -46,10 +46,9 @@ public class ImageService {
         }
     }
 
-
     public Image uploadFile(MultipartFile file, long article_id) {
-
         Image image;
+
         try {
             saveFile(file);
             String url = "http://localhost:8080/api/v1/files/" + file.getOriginalFilename();
@@ -102,8 +101,9 @@ public class ImageService {
     public String delete(long id) {
         try {
             Image image = entityUtility.getImageById(id);
-            entityUtility.deleteImageIfExists(image);
-            Files.deleteIfExists(Paths.get(root).resolve(image.getFilename()));
+            if (entityUtility.deleteImageIfExists(image)) {
+                Files.deleteIfExists(Paths.get(root).resolve(image.getFilename()));
+            }
         } catch (IOException e) {
             throw new UnprocessableEntityException("Could not delete file. Error: " + e.getMessage());
         }
