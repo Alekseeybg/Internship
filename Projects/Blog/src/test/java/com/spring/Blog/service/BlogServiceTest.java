@@ -46,7 +46,7 @@ public class BlogServiceTest {
     @Test
     public void givenNoBlogsInRepositoryWhenLookingForBlogsThrowException() {
         List<Blog> blogs1 = new ArrayList<>();
-        when(entityUtility.getBlogs()).thenReturn(emptyList);
+        when(entityUtility.getBlogs()).thenThrow(new ResourceNotFoundException(BLOGS_NOT_FOUND.getMessage()));
         try {
             blogs1 = blogService.getBlogs();
         } catch (ResourceNotFoundException e) {
@@ -102,6 +102,7 @@ public class BlogServiceTest {
         assertEquals(blog.getTitle(), blog1.getTitle());
     }
 
+    // Delete blog
     @Test
     public void givenWrongUsernameWhenDeleteBlogThenThrowException() {
         when(entityUtility.getUserByUsername("wrongUsername")).thenThrow(new ResourceNotFoundException(ExceptionMessages.USER_NOT_FOUND.getMessage()));
@@ -152,6 +153,7 @@ public class BlogServiceTest {
         verify(blogRepository, times(1)).deleteById(anyLong());
     }
 
+    // Update blog
     @Test
     public void givenWrongUsernameWhenUpdateBlogThenThrowException() {
         when(entityUtility.getUserByUsername("wrongUsername")).thenThrow(new ResourceNotFoundException(ExceptionMessages.USER_NOT_FOUND.getMessage()));

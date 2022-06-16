@@ -4,8 +4,6 @@ import com.spring.Blog.model.Article;
 import com.spring.Blog.model.Blog;
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.ArticleRepository;
-import com.spring.Blog.repository.BlogRepository;
-import com.spring.Blog.repository.UserRepository;
 import com.spring.Blog.utility.exception.UnauthorizedException;
 import com.spring.Blog.utility.exception.ExceptionMessages;
 import com.spring.Blog.utility.EntityUtility;
@@ -19,10 +17,6 @@ public class ArticleService {
     @Autowired
     private ArticleRepository articleRepository;
     @Autowired
-    private BlogRepository blogRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
     private EntityUtility entityUtility;
 
     public List<Article> getArticles() {
@@ -34,7 +28,6 @@ public class ArticleService {
         Blog blog = entityUtility.getBlogById(blogId);
 
         if (entityUtility.userLogged(user) && (entityUtility.userIsBlogOwner(blog, user) || entityUtility.userIsAdmin(user))) {
-            //TODO: FIX when you add an article as admin to another user's blog it sets the owner as admin
             return saveArticle(article, blog, user);
         }
         String message = ExceptionMessages.UNAUTHORIZED.getMessage();
@@ -65,7 +58,7 @@ public class ArticleService {
          articleRepository.delete(articleToDelete);
     }
 
-    public Article saveArticle(Article article, Blog blog, User user) {
+    private Article saveArticle(Article article, Blog blog, User user) {
         article.setBlog(blog);
         article.setAuthor(user);
         //blog.setOwner(user);
