@@ -3,7 +3,6 @@ package com.spring.Blog.service;
 import com.spring.Blog.model.Blog;
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.BlogRepository;
-import com.spring.Blog.repository.UserRepository;
 import com.spring.Blog.utility.exception.UnauthorizedException;
 import com.spring.Blog.utility.EntityUtility;
 import com.spring.Blog.utility.exception.ExceptionMessages;
@@ -12,13 +11,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
 @Service
 public class BlogService {
     @Autowired
     private BlogRepository blogRepository;
-    @Autowired
-    private UserRepository userRepository;
+
     @Autowired
     private EntityUtility entityUtility;
 
