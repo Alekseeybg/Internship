@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import com.spring.Blog.utility.exception.ResourceNotFoundException;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static com.spring.Blog.utility.user.UserRoles.*;
 import static org.junit.Assert.*;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@SpringBootTest
 public class UserServiceTest {
     @InjectMocks
     private UserService userService;

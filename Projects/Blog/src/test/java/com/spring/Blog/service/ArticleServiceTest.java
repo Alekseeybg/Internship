@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +25,7 @@ import static com.spring.Blog.utility.user.UserRoles.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
 public class ArticleServiceTest {
     @InjectMocks
     private ArticleService articleService;

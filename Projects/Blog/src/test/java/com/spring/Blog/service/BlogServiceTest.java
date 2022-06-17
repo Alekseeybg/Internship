@@ -60,7 +60,7 @@ public class BlogServiceTest {
         List<Blog> blogs1;
         when(entityUtility.getBlogs()).thenReturn(blogs);
         blogs1 = blogService.getBlogs();
-        assertEquals(blogs1, blogs);
+        assertEquals(blogs1, Collections.emptyList());
     }
 
     @Test
