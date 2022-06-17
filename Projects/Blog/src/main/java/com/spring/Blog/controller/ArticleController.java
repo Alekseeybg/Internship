@@ -38,9 +38,9 @@ public class ArticleController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Article> updateArticle(@RequestBody Article article,
-                                                 @PathVariable(name = "id") Long id,
+                                                 @PathVariable(name = "id") Long articleId,
                                                  @RequestParam(name = "user") String username) {
-        Article updatedArticle = articleService.updateArticle(article, id, username);
+        Article updatedArticle = articleService.updateArticle(article, articleId, username);
         return new ResponseEntity<>(updatedArticle, HttpStatus.OK);
     }
 
