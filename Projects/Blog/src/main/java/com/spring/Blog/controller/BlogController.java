@@ -21,6 +21,11 @@ public class BlogController {
         return new ResponseEntity<>(blogService.getBlogs(), HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Blog> getBlog(@PathVariable("id") Long id) {
+        return new ResponseEntity<>(blogService.getBlog(id), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<String> addBlogToUser(@RequestBody Blog blog, @RequestParam(name = "user") String username) {
         blogService.addBlog(blog, username);

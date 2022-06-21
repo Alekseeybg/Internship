@@ -26,6 +26,9 @@ public class BlogService {
     public List<Blog> getBlogs() {
         return entityUtility.getBlogs();
     }
+    public Blog getBlog(Long id) {
+        return entityUtility.getBlogById(id);
+    }
 
     public Blog addBlog(@RequestBody Blog blog, String username) {
         User user = entityUtility.getUserByUsername(username);
@@ -63,4 +66,6 @@ public class BlogService {
         blogToUpdate.setTitle(blog.getTitle());
         return blogRepository.save(blogToUpdate);
     }
+
+
 }

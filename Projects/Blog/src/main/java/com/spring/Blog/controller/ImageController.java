@@ -51,7 +51,7 @@ public class ImageController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteFile(@PathVariable("id") long id, @RequestParam(name = "user") String username) {
+    public ResponseEntity<String> deleteFile(@PathVariable("id") long id) {
         imageService.delete(id);
         return new ResponseEntity<>("Image deleted!", HttpStatus.NO_CONTENT);
     }
