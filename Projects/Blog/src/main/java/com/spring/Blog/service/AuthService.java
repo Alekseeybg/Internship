@@ -2,6 +2,7 @@ package com.spring.Blog.service;
 
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.UserRepository;
+import com.spring.Blog.utility.exception.ConflictException;
 import com.spring.Blog.utility.exception.UnauthorizedException;
 import com.spring.Blog.utility.exception.UnprocessableEntityException;
 import com.spring.Blog.utility.user.UserRoles;
@@ -9,6 +10,7 @@ import com.spring.Blog.utility.EntityUtility;
 import com.spring.Blog.utility.user.ValidationMessages;
 import com.spring.Blog.utility.exception.ExceptionMessages;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,17 +32,19 @@ public class AuthService {
             throw new UnprocessableEntityException(result.getMessage());
         } else if (entityUtility.userExists(user.getUsername()) || entityUtility.emailExists(user.getEmail())) {
             String message = ExceptionMessages.USERNAME_EMAIL_EXISTS.getMessage();
-            throw new UnprocessableEntityException(message);
+            throw new ConflictException(message);
         }
         user.setRole(role.getRole());
+        String encodedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt(12));
+        //String encodedEmail = BCrypt.hashpw(user.getEmail(), BCrypt.gensalt(12));
+        user.setPassword(encodedPassword);
         return userRepository.save(user);
     }
 
     public User login(@RequestBody User user) {
         User userDb = entityUtility.getUserByEmail(user.getEmail());
         if (!entityUtility.correctPassword(userDb, user.getPassword())) {
-            String message = ExceptionMessages.INCORRECT_PASSWORD.getMessage();
-            throw new UnauthorizedException(message);
+            return null;
         }
         userDb.setLogged(true);
         return userRepository.save(userDb);

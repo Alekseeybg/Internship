@@ -27,6 +27,8 @@ public class ArticleService {
         User user = entityUtility.getUserByUsername(username);
         Blog blog = entityUtility.getBlogById(blogId);
 
+        entityUtility.checkArticleData(article.getTitle(), article.getContent());
+
         if (entityUtility.userLogged(user) && (entityUtility.userIsBlogOwner(blog, user) || entityUtility.userIsAdmin(user))) {
             return saveArticle(article, blog, user);
         }
@@ -39,6 +41,7 @@ public class ArticleService {
         User user = entityUtility.getUserByUsername(username);
         Article articleToUpdate = entityUtility.getArticleById(articleId);
 
+        entityUtility.checkArticleData(article.getTitle(), article.getContent());
         if (entityUtility.userLogged(user) && (entityUtility.userIsArticleAuthor(articleToUpdate, user) || entityUtility.userIsAdmin(user))) {
             articleToUpdate.setTitle(article.getTitle());
             articleToUpdate.setContent(article.getContent());

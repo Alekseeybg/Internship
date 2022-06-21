@@ -103,6 +103,7 @@ public class ImageService {
             Image image = entityUtility.getImageById(id);
             if (entityUtility.deleteImageIfExists(image)) {
                 Files.deleteIfExists(Paths.get(root).resolve(image.getFilename()));
+                imageRepository.delete(image);
             }
         } catch (IOException e) {
             throw new UnprocessableEntityException("Could not delete file. Error: " + e.getMessage());

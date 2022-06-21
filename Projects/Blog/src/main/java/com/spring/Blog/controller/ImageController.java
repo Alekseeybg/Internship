@@ -34,9 +34,10 @@ public class ImageController {
     private ArticleRepository articleRepository;
 
     @PostMapping("/{articleId}")
-    public ResponseEntity<Image> uploadFile(@RequestParam("file") MultipartFile file,
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
                                             @PathVariable("articleId") long article_id) {
-        return new ResponseEntity<>(imageService.uploadFile(file, article_id), HttpStatus.OK);
+        imageService.uploadFile(file, article_id);
+        return new ResponseEntity<>("Image uploaded successfully!", HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -51,7 +52,8 @@ public class ImageController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteFile(@PathVariable("id") long id, @RequestParam(name = "user") String username) {
-        return new ResponseEntity<>(imageService.delete(id), HttpStatus.NO_CONTENT);
+        imageService.delete(id);
+        return new ResponseEntity<>("Image deleted!", HttpStatus.NO_CONTENT);
     }
 
     @GetMapping(value = "/view/{filename:.+}", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_GIF_VALUE})

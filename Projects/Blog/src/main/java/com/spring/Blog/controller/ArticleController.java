@@ -28,12 +28,12 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ResponseEntity<Article> addArticle(@RequestBody Article article,
+    public ResponseEntity<String> addArticle(@RequestBody Article article,
                                               @RequestParam(name = "user") String username,
                                               @RequestParam(name = "blogId") Long blogId) {
 
-        Article newArticle = articleService.addArticle(article, username, blogId);
-        return new ResponseEntity<>(newArticle, HttpStatus.CREATED);
+        articleService.addArticle(article, username, blogId);
+        return new ResponseEntity<>("Article created successfully!", HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")

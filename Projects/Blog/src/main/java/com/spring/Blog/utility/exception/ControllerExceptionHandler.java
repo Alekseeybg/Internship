@@ -54,6 +54,17 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorMessage> ConflictException(ConflictException ex, WebRequest request) {
+        ErrorMessage message = new ErrorMessage(
+                HttpStatus.CONFLICT.value(),
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false));
+
+        return new ResponseEntity<>(message, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorMessage> ForbiddenException(ForbiddenException ex, WebRequest request) {
         ErrorMessage message = new ErrorMessage(

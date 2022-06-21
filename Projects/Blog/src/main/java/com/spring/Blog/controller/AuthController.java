@@ -17,8 +17,12 @@ public class AuthController {
 
     @PostMapping
     @RequestMapping(path = "/register")
-    public ResponseEntity<User> register(@RequestBody User user, @RequestParam(name = "role", defaultValue = "USER") UserRoles role) {
-        return new ResponseEntity<>(authService.register(user, role), HttpStatus.CREATED);
+    public ResponseEntity<String> register(@RequestBody User user, @RequestParam(name = "role", defaultValue = "USER") UserRoles role) {
+        authService.register(user, role);
+        if (role.equals(UserRoles.ADMIN)) {
+            return new ResponseEntity<>("Admin registered successfully!", HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>("User registered successfully!", HttpStatus.CREATED);
     }
 
     @PostMapping

@@ -6,9 +6,7 @@ import com.spring.Blog.model.Image;
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.ArticleRepository;
 import com.spring.Blog.utility.EntityUtility;
-import com.spring.Blog.utility.exception.ExceptionMessages;
-import com.spring.Blog.utility.exception.ResourceNotFoundException;
-import com.spring.Blog.utility.exception.UnauthorizedException;
+import com.spring.Blog.utility.exception.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -92,6 +90,34 @@ public class ArticleServiceTest {
     }
 
     @Test
+    public void givenNullArticleTitleThenReturnValidationMessage() {
+        article.setTitle(null);
+        when(entityUtility.checkArticleData(article.getTitle(),article.getContent())).thenThrow(new UnprocessableEntityException(INVALID_ARTICLE_TITLE.getMessage()));
+        when(entityUtility.userLogged(any())).thenReturn(true);
+        when(entityUtility.userIsBlogOwner(blog, user)).thenReturn(true);
+        try {
+            articleService.addArticle(article, "User", 1L);
+        } catch (UnprocessableEntityException e) {
+            assertEquals(e.getMessage(), INVALID_ARTICLE_TITLE.getMessage());
+        }
+        verify(articleRepository, never()).save(any(Article.class));
+    }
+
+    @Test
+    public void givenInvalidArticleTitleThenReturnValidationMessage() {
+        article.setTitle("");
+        when(entityUtility.checkArticleData(article.getTitle(),article.getContent())).thenThrow(new UnprocessableEntityException(INVALID_ARTICLE_TITLE.getMessage()));
+        when(entityUtility.userLogged(any())).thenReturn(true);
+        when(entityUtility.userIsBlogOwner(blog, user)).thenReturn(true);
+        try {
+            articleService.addArticle(article, "User", 1L);
+        } catch (UnprocessableEntityException e) {
+            assertEquals(e.getMessage(), INVALID_ARTICLE_TITLE.getMessage());
+        }
+        verify(articleRepository, never()).save(any(Article.class));
+    }
+
+    @Test
     public void givenArticleAndCorrectNotAuthenticatedUsernameWhenAddArticleThenThrowException() {
         when(entityUtility.getUserByUsername(anyString())).thenReturn(user);
         when(entityUtility.userLogged(user)).thenReturn(false);
@@ -100,7 +126,19 @@ public class ArticleServiceTest {
         } catch (UnauthorizedException e) {
             assertEquals(e.getMessage(), ExceptionMessages.UNAUTHORIZED.getMessage());
         }
-        verify(articleRepository, never()).save(article);
+        verify(articleRepository, never()).save(any(Article.class));
+    }
+
+    @Test
+    public void givenArticleTitleExistsThenReturnValidationMessage() {
+        when(entityUtility.checkArticleData(article.getTitle(),article.getContent())).thenThrow(new ConflictException(ARTICLE_TITLE_EXISTS.getMessage()));
+        when(entityUtility.userLogged(any())).thenReturn(true);
+        try {
+            articleService.addArticle(article, "User",1L);
+        } catch (ConflictException e) {
+            assertEquals(e.getMessage(), ARTICLE_TITLE_EXISTS.getMessage());
+        }
+        verify(articleRepository, never()).save(any(Article.class));
     }
 
     @Test
@@ -178,7 +216,7 @@ public class ArticleServiceTest {
         } catch (ResourceNotFoundException e) {
             assertEquals(e.getMessage(), ExceptionMessages.USER_NOT_FOUND.getMessage());
         }
-        verify(articleRepository, never()).save(article);
+        verify(articleRepository, never()).save(any(Article.class));
     }
 
     @Test
@@ -191,7 +229,7 @@ public class ArticleServiceTest {
         } catch (ResourceNotFoundException e) {
             assertEquals(e.getMessage(), ExceptionMessages.ARTICLE_NOT_FOUND.getMessage());
         }
-        verify(articleRepository, never()).save(article);
+        verify(articleRepository, never()).save(any(Article.class));
     }
 
     @Test
@@ -204,7 +242,7 @@ public class ArticleServiceTest {
         } catch (UnauthorizedException e) {
             assertEquals(e.getMessage(), ExceptionMessages.UNAUTHORIZED.getMessage());
         }
-        verify(articleRepository, never()).save(article);
+        verify(articleRepository, never()).save(any(Article.class));
     }
 
     @Test

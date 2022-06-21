@@ -22,9 +22,9 @@ public class BlogController {
     }
 
     @PostMapping
-    public ResponseEntity<Blog> addBlogToUser(@RequestBody Blog blog, @RequestParam(name = "user") String username) {
-        blog = blogService.addBlog(blog, username);
-        return new ResponseEntity<>(blog, HttpStatus.CREATED);
+    public ResponseEntity<String> addBlogToUser(@RequestBody Blog blog, @RequestParam(name = "user") String username) {
+        blogService.addBlog(blog, username);
+        return new ResponseEntity<>("Blog created successfully!", HttpStatus.CREATED);
     }
 
     @DeleteMapping(path = "/{blogId}")
@@ -34,7 +34,8 @@ public class BlogController {
     }
 
     @PutMapping(path = "/{blogId}")
-    public ResponseEntity<Blog> updateBlog(@RequestBody Blog blog, @PathVariable("blogId") long blogId, @RequestParam(name = "user") String username) {
-        return new ResponseEntity<>(blogService.updateBlog(blog, blogId, username), HttpStatus.OK);
+    public ResponseEntity<String> updateBlog(@RequestBody Blog blog, @PathVariable("blogId") long blogId, @RequestParam(name = "user") String username) {
+        blogService.updateBlog(blog, blogId, username);
+        return new ResponseEntity<>("Blog updated successfully", HttpStatus.OK);
     }
 }

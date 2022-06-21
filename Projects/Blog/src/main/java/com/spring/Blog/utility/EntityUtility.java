@@ -9,12 +9,10 @@ import com.spring.Blog.repository.ArticleRepository;
 import com.spring.Blog.repository.BlogRepository;
 import com.spring.Blog.repository.ImageRepository;
 import com.spring.Blog.repository.UserRepository;
-import com.spring.Blog.utility.exception.ExceptionMessages;
-import com.spring.Blog.utility.exception.ResourceNotFoundException;
-import com.spring.Blog.utility.exception.UnprocessableEntityException;
-import com.spring.Blog.utility.user.ValidationMessages;
+import com.spring.Blog.utility.exception.*;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -44,8 +42,8 @@ public class EntityUtility {
     }
 
     public boolean correctPassword(User user, String password) {
-        if (!user.getPassword().equals(password)) {
-            throw new UnprocessableEntityException("Incorrect password");
+        if (!BCrypt.checkpw(password, user.getPassword())) {
+            throw new UnauthorizedException("Incorrect password");
         }
         return true;
     }
@@ -61,6 +59,7 @@ public class EntityUtility {
     public boolean userIsArticleAuthor(Article article, User user) {
         return article.getAuthor().equals(user);
     }
+
     public boolean userIsAdmin(User user) {
         return user.getRole().equals(ADMIN.getRole());
     }
@@ -102,6 +101,27 @@ public class EntityUtility {
         return blogs;
     }
 
+    public boolean checkBlogData(String title) {
+        if (!blogTitleValid(title)) {
+            String message = ExceptionMessages.INVALID_BLOG_TITLE.getMessage();
+            throw new UnprocessableEntityException(message);
+        }
+
+        if (blogExists(title)) {
+            String message = ExceptionMessages.BLOG_TITLE_EXISTS.getMessage();
+            throw new ConflictException(message);
+        }
+        return true;
+    }
+
+    public boolean blogExists(String title) {
+        return blogRepository.findByTitle(title) != null;
+    }
+
+    public boolean blogTitleValid(String title) {
+        return title != null && !title.trim().isEmpty() && title.length() >= 3 && title.length() <= 255;
+    }
+
     public List<Article> getArticles() {
         List<Article> articles = articleRepository.findAll();
         if (articles.isEmpty()) {
@@ -109,6 +129,36 @@ public class EntityUtility {
             throw new ResourceNotFoundException(message);
         }
         return articles;
+    }
+
+    public boolean checkArticleData(String title, String content) {
+        if (!articleTitleValid(title)) {
+            String message = ExceptionMessages.INVALID_ARTICLE_TITLE.getMessage();
+            throw new UnprocessableEntityException(message);
+        }
+
+        if (articleExists(title)) {
+            String message = ExceptionMessages.ARTICLE_TITLE_EXISTS.getMessage();
+            throw new ConflictException(message);
+        }
+
+        if (!articleContentValid(content)) {
+            String message = ExceptionMessages.INVALID_ARTICLE_CONTENT.getMessage();
+            throw new UnprocessableEntityException(message);
+        }
+        return true;
+    }
+
+    public boolean articleExists(String title) {
+        return articleRepository.findByTitle(title) != null;
+    }
+
+    public boolean articleTitleValid(String title) {
+        return title != null && !title.trim().isEmpty() && title.length() >= 3 && title.length() <= 255;
+    }
+
+    public boolean articleContentValid(String content) {
+        return content != null && !content.trim().isEmpty() && content.length() >= 2;
     }
 
     public Article getArticleById(long articleId) {

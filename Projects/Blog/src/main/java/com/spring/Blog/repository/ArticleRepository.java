@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> findByBlog(Blog blog);
+
+    Article findByTitle(String title);
 }

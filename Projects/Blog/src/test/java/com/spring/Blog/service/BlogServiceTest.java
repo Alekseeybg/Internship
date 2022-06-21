@@ -4,9 +4,7 @@ import com.spring.Blog.model.Blog;
 import com.spring.Blog.model.User;
 import com.spring.Blog.repository.BlogRepository;
 import com.spring.Blog.utility.EntityUtility;
-import com.spring.Blog.utility.exception.ExceptionMessages;
-import com.spring.Blog.utility.exception.ResourceNotFoundException;
-import com.spring.Blog.utility.exception.UnauthorizedException;
+import com.spring.Blog.utility.exception.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -18,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.spring.Blog.utility.exception.ExceptionMessages.BLOGS_NOT_FOUND;
+import static com.spring.Blog.utility.exception.ExceptionMessages.*;
 import static com.spring.Blog.utility.user.UserRoles.USER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -60,7 +58,45 @@ public class BlogServiceTest {
         List<Blog> blogs1;
         when(entityUtility.getBlogs()).thenReturn(blogs);
         blogs1 = blogService.getBlogs();
-        assertEquals(blogs1, Collections.emptyList());
+        assertEquals(blogs1, blogs);
+    }
+
+    @Test
+    public void givenNullBlogTitleThenReturnValidationMessage() {
+        blog.setTitle(null);
+        when(entityUtility.checkBlogData(blog.getTitle())).thenThrow(new UnprocessableEntityException(INVALID_BLOG_TITLE.getMessage()));
+        when(entityUtility.userLogged(any())).thenReturn(true);
+        try {
+            blogService.addBlog(blog, "User");
+        } catch (UnprocessableEntityException e) {
+            assertEquals(e.getMessage(), INVALID_BLOG_TITLE.getMessage());
+        }
+        verify(blogRepository, never()).save(any(Blog.class));
+    }
+
+    @Test
+    public void givenInvalidBlogTitleThenReturnValidationMessage() {
+        blog.setTitle("");
+        when(entityUtility.checkBlogData(blog.getTitle())).thenThrow(new UnprocessableEntityException(INVALID_BLOG_TITLE.getMessage()));
+        when(entityUtility.userLogged(any())).thenReturn(true);
+        try {
+            blogService.addBlog(blog, "User");
+        } catch (UnprocessableEntityException e) {
+            assertEquals(e.getMessage(), INVALID_BLOG_TITLE.getMessage());
+        }
+        verify(blogRepository, never()).save(any(Blog.class));
+    }
+
+    @Test
+    public void givenBlogTitleExistsThenReturnValidationMessage() {
+        when(entityUtility.checkBlogData(blog.getTitle())).thenThrow(new ConflictException(BLOG_TITLE_EXISTS.getMessage()));
+        when(entityUtility.userLogged(any())).thenReturn(true);
+        try {
+            blogService.addBlog(blog, "User");
+        } catch (ConflictException e) {
+            assertEquals(e.getMessage(), BLOG_TITLE_EXISTS.getMessage());
+        }
+        verify(blogRepository, never()).save(any(Blog.class));
     }
 
     @Test
@@ -83,7 +119,7 @@ public class BlogServiceTest {
         } catch (UnauthorizedException e) {
             assertEquals(e.getMessage(), ExceptionMessages.UNAUTHORIZED.getMessage());
         }
-        verify(blogRepository, never()).save(blog);
+        verify(blogRepository, never()).save(any(Blog.class));
     }
 
     @Test
@@ -162,7 +198,7 @@ public class BlogServiceTest {
         } catch (ResourceNotFoundException e) {
             assertEquals(e.getMessage(), ExceptionMessages.USER_NOT_FOUND.getMessage());
         }
-        verify(blogRepository, never()).save(blog);
+        verify(blogRepository, never()).save(any(Blog.class));
     }
 
     @Test
@@ -175,7 +211,7 @@ public class BlogServiceTest {
         } catch (ResourceNotFoundException e) {
             assertEquals(e.getMessage(), ExceptionMessages.BLOG_NOT_FOUND.getMessage());
         }
-        verify(blogRepository, never()).save(blog);
+        verify(blogRepository, never()).save(any(Blog.class));
     }
 
     @Test
@@ -188,7 +224,7 @@ public class BlogServiceTest {
         } catch (UnauthorizedException e) {
             assertEquals(e.getMessage(), ExceptionMessages.UNAUTHORIZED.getMessage());
         }
-        verify(blogRepository, never()).save(blog);
+        verify(blogRepository, never()).save(any(Blog.class));
     }
 
     @Test
