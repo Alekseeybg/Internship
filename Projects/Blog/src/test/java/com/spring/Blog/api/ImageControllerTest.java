@@ -56,20 +56,10 @@ public class ImageControllerTest {
                 "some image bytes".getBytes()
         );
 
-        /*File file = new File(root + "/file.jpg");
-        MockMultipartFile upload = new MockMultipartFile("file", "file.jpg",
-                MediaType.IMAGE_JPEG_VALUE,
-                Files.readAllBytes(file.toPath()));
-        mockMvc.perform(multipart(BASE_URL + "/files/" + FAKE_ID)
-                        .file(upload))
-                        .andExpect(status().isCreated());*/
-
-
-        /*mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/files/" + FAKE_ID)
-                        .content(mapper.writeValueAsString(imageBuilder2()))
-                        .contentType(IMAGE_JPEG))
-                .andExpect(status().isCreated());*/
-        //TODO: ask for help
+        mockMvc.perform(MockMvcRequestBuilders
+                        .multipart(BASE_URL + "/files/" + FAKE_ID)
+                        .file(file))
+                .andExpect(status().isCreated());
     }
 
     @Test
